@@ -1,0 +1,31 @@
+[[Transport]]
+Ip = "127.0.0.1"
+TargetHost = "127.0.0.1"
+TargetPort = 8888
+Symkey = "0123456789012345"
+MinConnNum = 2
+MaxConnNum = 2
+LocalPort = 13000
+
+[[Transport]]
+Ip = "127.0.0.1"
+TargetHost = "118.25.195.227"
+TargetPort = 22
+Symkey = "0123456789012345"
+MinConnNum = 2
+MaxConnNum = 2
+LocalPort = 13001
+KeepAlive = true
+
+[CmdServer]
+Port = 3333
+
+[ProxyServer]
+MinPort = 13000
+MaxPort = 14000
+
+[HttpServer]
+Port = 8888
+
+[Global]
+WaitNewConnSeconds = 5

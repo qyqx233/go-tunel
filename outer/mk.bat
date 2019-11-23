@@ -1,0 +1,1 @@
+go build proxy.go config.go cmd.go main.go transport.go

@@ -1,0 +1,6 @@
+inner/inner.exe
+outer/proxy.exe
+proxy/escape.txt
+proxy/main.exe
+inner/err.log
+.vscode/settings.json
