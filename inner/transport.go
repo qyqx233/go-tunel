@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gotunel/lib/proto"
 	"gotunel/lib"
+	"gotunel/lib/proto"
 )
 
 var maxUint63 uint64 = 2<<62 - 1
@@ -33,7 +33,6 @@ type transport struct {
 
 func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID int64, corrReqID int64) error {
 	shake := proto.ShakeProto{
-		TcpOrUdp:  t.tcpOrUdp[0],
 		Type:      transportType,
 		Usage:     usage,
 		Name:      t.name,

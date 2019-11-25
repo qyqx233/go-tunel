@@ -33,8 +33,7 @@ func (h H) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		port := values.Get("port")
 		name := values.Get("name")
 		symkey := values.Get("symkey")
-		tcpOrUdp := values.Get("tcpOrUdp")
-		h.handleRegister(w, host, port, name, tcpOrUdp, symkey)
+		h.handleRegister(w, host, port, name, symkey)
 	}
 	w.Write([]byte("hello"))
 }
@@ -43,13 +42,13 @@ func (h H) handleShutdown(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h H) handleRegister(w http.ResponseWriter, host, port, name, tcpOrUdp, symkey string) {
+func (h H) handleRegister(w http.ResponseWriter, host, port, name, symkey string) {
 	portInt, _ := strconv.Atoi(port)
 	transportMng.rwl.Lock()
 	// var nameArr, symkeyArr [16]byte
 	nameBytes := []byte(name)
 	symkeyBytes := []byte(symkey)
-	tl = transportMng.add(&transportStru{IP: host, TargetPort: portInt, Name: nameBytes, TcpOrUdp: tcpOrUdp, SymKey: symkeyBytes})
+	tl = transportMng.add(&transportStru{IP: host, TargetPort: portInt, Name: nameBytes, SymKey: symkeyBytes})
 	transportMng.rwl.Unlock()
 	fmt.Println(transportMng.tl)
 }
