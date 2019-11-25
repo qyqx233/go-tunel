@@ -73,14 +73,32 @@ func (cmd zz) send(conn net.Conn, p unsafe.Pointer, n int) error {
 	slice := Slice{Addr: p, Cap: n, Len: n}
 	bs := *(*[]byte)(unsafe.Pointer(&slice))
 	// fmt.Println("开始发送", bs, len(bs), cap(bs))
-	_, err := conn.Write(bs)
+	m, left, succ := 0, n, 0
+	var err error
+	for left > 0 {
+		m, err = conn.Write(bs[succ:])
+		if err != nil {
+			return err
+		}
+		left -= m
+		succ += m
+	}
 	return err
 }
 
 func (cmd zz) recv(conn net.Conn, p unsafe.Pointer, n int) error {
 	slice := Slice{Addr: p, Cap: n, Len: n}
 	bs := *(*[]byte)(unsafe.Pointer(&slice))
-	_, err := conn.Read(bs)
+	var err error
+	m, left, succ := 0, n, 0
+	for left > 0 {
+		m, err = conn.Read(bs[succ:])
+		if err != nil {
+			return err
+		}
+		left -= m
+		succ += m
+	}
 	// fmt.Println("开始接收", bs, len(bs), cap(bs))
 	return err
 }
