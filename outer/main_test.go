@@ -1,4 +1,4 @@
-package main
+package outer
 
 import (
 	"bytes"
@@ -116,7 +116,7 @@ func TestInt(t *testing.T) {
 }
 
 func TestConfig(t *testing.T) {
-	parseConfig("outer.toml")
+	outer.ParseConfig("outer.toml")
 	t.Log(config.Transport[0].IP, config.Transport[0].TargetPort, config.Transport[0].Symkey)
 	t.Log(config.CmdServer.Port)
 	t.Log(config.ProxyServer.MinPort)

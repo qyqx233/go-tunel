@@ -1,4 +1,4 @@
-package main
+package inner
 
 import (
 	"flag"
@@ -34,7 +34,7 @@ func init() {
 	logger = lib.GetLogger()
 }
 
-func main() {
+func Start() {
 	var path string
 	var config Config
 	flag.StringVar(&path, "c", "inner.toml", "config path")

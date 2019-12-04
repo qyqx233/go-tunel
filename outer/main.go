@@ -1,4 +1,4 @@
-package main
+package outer
 
 import (
 	"flag"
@@ -7,7 +7,7 @@ import (
 
 var logger = lib.GetLogger()
 
-func main() {
+func Start() {
 	var path string
 	flag.StringVar(&path, "c", "outer.toml", "config path")
 	parseConfig(path)
