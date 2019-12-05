@@ -3,19 +3,13 @@ Name = "test1"
 Symkey = "0123456789012345"
 
 [[Transport]]
-TcpOrUdp = "tcp"
-TargetPort = 8888
-TargetHost = "127.0.0.1"
-MinConns = 0
-MaxConns = 5
+TargetPort = 8888 # 要映射出去的端口
+TargetHost = "127.0.0.1" # 
 ServerIp = "127.0.0.1"
 ServerPort = 3333
 
 [[Transport]]
-TcpOrUdp = "tcp"
-TargetPort = 22
+TargetPort = 4403
 TargetHost = "118.25.195.227"
-MinConns = 0
-MaxConns = 5
 ServerIp = "127.0.0.1"
 ServerPort = 3333

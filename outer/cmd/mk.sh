@@ -1,1 +1,1 @@
-go build main.go -o outer
+go build  -o outer main.go

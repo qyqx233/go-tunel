@@ -3,28 +3,24 @@ Ip = "127.0.0.1"
 TargetHost = "127.0.0.1"
 TargetPort = 8888
 Symkey = "0123456789012345"
-MinConnNum = 2
-MaxConnNum = 2
 LocalPort = 13000
 
 [[Transport]]
 Ip = "127.0.0.1"
 TargetHost = "118.25.195.227"
-TargetPort = 22
+TargetPort = 4403
 Symkey = "0123456789012345"
-MinConnNum = 2
-MaxConnNum = 2
 LocalPort = 13001
 KeepAlive = true
 
 [CmdServer]
 Port = 3333
 
-[ProxyServer]
-MinPort = 13000
-MaxPort = 14000
+[ProxyServer] # 每个transport都会在outer服务上随机映射一个端口（如果transport配置段LocalPort = 0的话）
+MinPort = 13000 # 随机分配的最小端口
+MaxPort = 14000 # 随机分配的最大端口
 
-[HttpServer]
+[HttpServer] # http管理端口
 Port = 8888
 
 [Global]

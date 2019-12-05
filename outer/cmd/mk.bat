@@ -1,1 +1,1 @@
-go build main.go -o outer.exe
+go build  -o outer.exe main.go

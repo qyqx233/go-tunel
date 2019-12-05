@@ -1,1 +1,1 @@
-go build main.go -o inner.exe
+go build -o inner.exe main.go

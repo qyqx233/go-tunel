@@ -116,7 +116,7 @@ func TestInt(t *testing.T) {
 }
 
 func TestConfig(t *testing.T) {
-	outer.ParseConfig("outer.toml")
+	parseConfig("outer.toml")
 	t.Log(config.Transport[0].IP, config.Transport[0].TargetPort, config.Transport[0].Symkey)
 	t.Log(config.CmdServer.Port)
 	t.Log(config.ProxyServer.MinPort)

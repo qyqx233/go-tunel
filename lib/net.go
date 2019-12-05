@@ -52,7 +52,7 @@ func NewWrapConn(c net.Conn, id int64) WrapConnStru {
 	}
 }
 
-func Pipe(wg *sync.WaitGroup, to net.Conn, from net.Conn, done func()) {
+func Pipe(wg *sync.WaitGroup, to net.Conn, from net.Conn) {
 	var err error
 	n, err := io.Copy(to, from)
 	if err != nil {
@@ -60,8 +60,9 @@ func Pipe(wg *sync.WaitGroup, to net.Conn, from net.Conn, done func()) {
 	} else {
 		logger.Infof("io.Copy %d bytes", n)
 	}
+	from.Close()
+	to.Close()
 	wg.Done()
-	done()
 }
 
 type rwError struct {
