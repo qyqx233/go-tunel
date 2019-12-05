@@ -74,6 +74,10 @@ func (c *cmdServer) shake(conn net.Conn, shake *proto.ShakeProto) (string, error
 func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t *transportStru) {
 	targetHost := string(lib.Byte32ToBytes(shake.Host))
 	logger.Infof("服务器 地址%s:%s:%d", host, string(targetHost), shake.Port)
+	if shake.Magic != proto.Magic {
+		logger.Info("proto magic error")
+		shake.Code = proto.MagicErrorCode
+	}
 	v := transportStru{IP: host,
 		TargetPort: shake.Port,
 		TargetHost: targetHost,
@@ -140,6 +144,7 @@ func (c *cmdServer) handleConn(conn net.Conn) {
 	t = c.auth(conn, host, &shake)
 	if shake.Code != proto.OkCode {
 		shake.Send(conn)
+		wc.ShutDown()
 		return
 	}
 	needClose, err = c.dispatch(conn, &shake, t)

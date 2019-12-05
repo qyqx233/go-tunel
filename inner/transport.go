@@ -1,7 +1,6 @@
 package inner
 
 import (
-	"errors"
 	"net"
 	"strconv"
 	"sync"
@@ -29,10 +28,12 @@ type transport struct {
 	connCh     chan net.Conn
 	conns      []net.Conn
 	atomic     int32
+	shakeRetry int
 }
 
 func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID int64, corrReqID int64) error {
 	shake := proto.ShakeProto{
+		Magic:     proto.Magic,
 		Type:      transportType,
 		Usage:     usage,
 		Name:      t.name,
@@ -55,7 +56,7 @@ func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID i
 		}
 		if shake.Code != proto.OkCode {
 			logger.Errorf("握手返回错误码%d", shake.Code)
-			return errors.New("握手失败")
+			return FatalError{code: shake.Code, msg: "握手错误"}
 		}
 	}
 	return nil
@@ -110,12 +111,17 @@ func (t *transport) createConn() {
 	c.run(t, true)
 }
 
-func (t *transport) monitor() {
+func (t *transport) monitor(wg *sync.WaitGroup) {
 	tk := time.NewTicker(time.Duration(time.Minute))
 	for {
 		<-tk.C
 		logger.Debug("定时探测...")
-		go t.createCmdAndConn()
+		err := t.createCmdAndConn()
+		if _, ok := err.(FatalError); ok {
+			tk.Stop()
+			wg.Done()
+			break
+		}
 	}
 }
 
@@ -198,15 +204,8 @@ func (c wrappedConn) run(t *transport, reConn bool) {
 		c.Close()
 		return
 	}
-	// shake := proto.ShakeProto{}
-	// err = shake.Recv(c.Conn)
-	// if err != nil {
-	// 	logger.Error(err)
-	// 	return
-	// }
 	wg := &sync.WaitGroup{}
 	wc := lib.NewWrapConn(conn, lib.NextPosUid())
-	// logger.Infof("%v id =%d", wc.Conn, wc.ID())
 	wg.Add(2)
 	go lib.Pipe2(wg, wc, c.WrapConnStru, func() {
 		wc.Close()
@@ -220,6 +219,4 @@ func (c wrappedConn) run(t *transport, reConn bool) {
 		t.checkReConn()
 	}
 	wg.Wait()
-	// wc.ShutDown()
-	// c.Shutdown()
 }

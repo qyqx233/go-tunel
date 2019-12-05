@@ -9,11 +9,14 @@ type zz struct {
 	Version byte
 }
 
+var Magic int64 = 1122334455667788
+
 type ShakeProto struct {
 	TcpOrUdp byte
 	Type     int8 // 1-命令通道,2-传输通道
 	Usage    int8
 	Code     int8
+	Magic    int64
 	Name     [16]byte
 	SymKey   [16]byte
 	// Error     [64]byte
@@ -47,6 +50,7 @@ const (
 	HostNotRegisterCode
 	KeyErrorCode
 	TooManyConns
+	MagicErrorCode
 )
 
 const (
