@@ -11,7 +11,7 @@ go-tunel 是一个能将内网机器端口映射到外网访问的一个程序(�
 ![image](https://github.com/qyqx233/go-tunel/blob/master/res/Diagram-1.png)
 
 
-首先有三个角色,内网机(办公室电脑,公司服务器..)，部署`inner`程序,云服务器，部署`outer`程序, 访问端 `Client`安装Xshell等终端工具
+首先有三个角色,内网机(办公室电脑,公司服务器..)，部署`inner`程序;云服务器，部署`outer`程序; 用户端`Client`安装Xshell等终端工具
 
 `Inner`会主动与外网机器建立一个命令通道`Cmd`,建立成功后,外网端会选择一个端口(也可以配置文件中指定),记为`P`
 
