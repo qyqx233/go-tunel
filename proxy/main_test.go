@@ -39,8 +39,8 @@ func (c LogConnStru) ID() uint64 {
 }
 
 func Test_ss(t *testing.T) {
-	c := wrapConn{id: 1100}
-	c.log("11%d", 100)
-	cc := LogConnStru{}
-	haha(cc)
+	// c := wrapConn{id: 1100}
+	// c.log("11%d", 100)
+	// cc := LogConnStru{}
+	// haha(cc)
 }
