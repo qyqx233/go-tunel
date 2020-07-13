@@ -2,4 +2,4 @@
 
 Addr = ":10024"
 TargetHost = "127.0.0.1"
-TargetPort = 8000
+TargetPort = 7070

@@ -38,13 +38,25 @@ func NewTransportServer(addr string, host string, port int) TransportServerStru 
 
 func (t TransportServerStru) Transport(conn net.Conn) {
 	wg := &sync.WaitGroup{}
+	wg.Add(2)
 	conn1, err := NewTcpConn(t.host, t.port)
 	if err != nil {
 		logger.Error(err)
 		conn.Close()
 		return
 	}
-	lib.Pipe(wg, conn, conn1)
+	wc := lib.NewWrapConn(conn, 0)
+	wc1 := lib.NewWrapConn(conn1, 0)
+	go lib.Pipe2(wg, wc, wc1, func() {
+		conn.Close()
+		conn1.Close()
+	})
+	lib.Pipe2(wg, wc1, wc, func() {
+		conn.Close()
+		conn1.Close()
+	})
+	logger.Info("链接断开")
+	wg.Wait()
 }
 
 func (t TransportServerStru) Shutdown() {
