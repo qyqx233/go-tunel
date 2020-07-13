@@ -1,5 +1,5 @@
 [[Transport]]
 
-ListenPort = 10024
-TargetHost = ""
-TargetPort = 8888
+Addr = ":10024"
+TargetHost = "127.0.0.1"
+TargetPort = 8000

@@ -9,7 +9,7 @@ type Config struct {
 }
 
 type ConfigTransport struct {
-	ListenPort int
+	Addr string
 	TargetHost string
 	TargetPort int
 }
