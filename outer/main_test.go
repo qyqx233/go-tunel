@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unsafe"
 
-	"gotunel/lib/proto"
+	"github.com/qyqx233/go-tunel/lib/proto"
 )
 
 type _ss struct {

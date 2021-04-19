@@ -1,12 +1,13 @@
 package lib
 
 import (
-	"gotunel/lib/proto"
 	"io"
 	"net"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/qyqx233/go-tunel/lib/proto"
 )
 
 type LogConn interface {
@@ -72,8 +73,8 @@ type rwError struct {
 
 var ioCopy = io.Copy
 
-func Copy(dst io.Writer, src io.Reader) (written int64, err error) {
-	return copyBuffer(dst, src, nil)
+func Copy(dst net.Conn, src net.Conn, h func(net.Conn, []byte)) (written int64, err error) {
+	return copyBuffer(dst, src, nil, h)
 }
 
 func Copy2(dst net.Conn, src net.Conn) (written int64, err error) {
@@ -82,29 +83,29 @@ func Copy2(dst net.Conn, src net.Conn) (written int64, err error) {
 	return d.ReadFrom(s)
 }
 
-func copyBuffer(dst io.Writer, src io.Reader, buf []byte) (written int64, err error) {
-	if wt, ok := src.(io.WriterTo); ok {
-		logger.Debug("WriterTo")
-		return wt.WriteTo(dst)
-	}
-	// Similarly, if the writer has a ReadFrom method, use it to do the copy.
-	if rt, ok := dst.(io.ReaderFrom); ok {
-		return rt.ReadFrom(src)
-	}
+func copyBuffer(dst net.Conn, src net.Conn, buf []byte, h func(net.Conn, []byte)) (written int64, err error) {
+	// if wt, ok := src.(io.WriterTo); ok {
+	// logger.Debug("WriterTo")
+	// return wt.WriteTo(dst)
+	// }
+	// if rt, ok := dst.(io.ReaderFrom); ok {
+	// return rt.ReadFrom(src)
+	// }
 	if buf == nil {
 		size := 32 * 1024
-		if l, ok := src.(*io.LimitedReader); ok && int64(size) > l.N {
-			if l.N < 1 {
-				size = 1
-			} else {
-				size = int(l.N)
-			}
-		}
+		// if l, ok := src.(*io.LimitedReader); ok && int64(size) > l.N {
+		// 	if l.N < 1 {
+		// 		size = 1
+		// 	} else {
+		// 		size = int(l.N)
+		// 	}
+		// }
 		buf = make([]byte, size)
 	}
 	for {
 		nr, er := src.Read(buf)
 		if nr > 0 {
+			h(src, buf[:nr])
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
 				written += int64(nw)
@@ -131,6 +132,23 @@ func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) 
 	var err error
 	var n int64
 	n, err = io.Copy(to.Conn, from.Conn)
+	for {
+		if err != nil {
+			logger.Errorf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)
+			break
+		} else {
+			logger.Infof("%d->%d io.Copy %d bytes", from.ID(), to.ID(), n)
+			break
+		}
+	}
+	done()
+	wg.Done()
+}
+
+func Pipe3(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func(), h func(net.Conn, []byte)) {
+	var err error
+	var n int64
+	n, err = Copy(to.Conn, from.Conn, h)
 	for {
 		if err != nil {
 			logger.Errorf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)

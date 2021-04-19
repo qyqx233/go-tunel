@@ -1,7 +1,7 @@
 package outer
 
 import (
-	"gotunel/lib"
+	"github.com/qyqx233/go-tunel/lib"
 	"net"
 	"strconv"
 	"sync"

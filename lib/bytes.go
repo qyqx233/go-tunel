@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"gotunel/lib/proto"
+	"github.com/qyqx233/go-tunel/lib/proto"
 	"unsafe"
 )
 

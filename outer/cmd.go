@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"gotunel/lib"
-	"gotunel/lib/proto"
 	"net"
 	"strings"
 	"sync"
 	"sync/atomic"
+
+	"github.com/qyqx233/go-tunel/lib"
+	"github.com/qyqx233/go-tunel/lib/proto"
 )
 
 var reqID uint64

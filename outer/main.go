@@ -2,7 +2,7 @@ package outer
 
 import (
 	"flag"
-	"gotunel/lib"
+	"github.com/qyqx233/go-tunel/lib"
 )
 
 var logger = lib.GetLogger()

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gotunel/outer"
+	"github.com/qyqx233/go-tunel/outer"
 )
 
 func main() {

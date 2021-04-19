@@ -1,5 +1,6 @@
-[[Transport]]
+[[Transport]
 
 Addr = ":10024"
 TargetHost = "127.0.0.1"
 TargetPort = 7070
+UsePool = false

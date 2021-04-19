@@ -4,7 +4,7 @@ import (
 	"flag"
 	"github.com/BurntSushi/toml"
 	"go.uber.org/zap"
-	"gotunel/lib"
+	"github.com/qyqx233/go-tunel/lib"
 	"sync"
 )
 

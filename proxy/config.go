@@ -12,13 +12,13 @@ type ConfigTransport struct {
 	Addr       string
 	TargetHost string
 	TargetPort int
+	UsePool    bool
 }
 
 var config Config
 
 func parseConfig(configPath string) {
 	_, err := toml.DecodeFile(configPath, &config)
-	logger.Info("%d", len(config.Transport))
 	if err != nil {
 		panic(err)
 	}

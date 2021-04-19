@@ -2,9 +2,10 @@ package outer
 
 import (
 	"context"
-	"gotunel/lib"
-	"gotunel/lib/proto"
 	"sync"
+
+	"github.com/qyqx233/go-tunel/lib"
+	"github.com/qyqx233/go-tunel/lib/proto"
 )
 
 type hostConf struct {

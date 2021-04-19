@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gotunel/lib"
-	"gotunel/lib/proto"
+	"github.com/qyqx233/go-tunel/lib"
+	"github.com/qyqx233/go-tunel/lib/proto"
 )
 
 var maxUint63 uint64 = 2<<62 - 1

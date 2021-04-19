@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gotunel/inner"
+	"github.com/qyqx233/go-tunel/inner"
 )
 
 func main() {
