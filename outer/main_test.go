@@ -20,13 +20,13 @@ func TestList(t *testing.T) {
 	s = append(s, []int{0, 1, 2, 3, 4}...)
 	copy(s[3:6], s[2:5])
 	// var hl hostList = make([]*transportStru, 0, 10)
-	h := transportStru{IP: "1.1.1.1", TargetPort: 6002}
+	h := transportImpl{IP: "1.1.1.1", TargetPort: 6002}
 	fmt.Printf("%p\n", &h)
-	h = transportStru{IP: "1.1.1.1", TargetPort: 6003}
+	h = transportImpl{IP: "1.1.1.1", TargetPort: 6003}
 	fmt.Printf("%p\n", &h)
-	h1 := &transportStru{IP: "1.1.1.1", TargetPort: 6002}
+	h1 := &transportImpl{IP: "1.1.1.1", TargetPort: 6002}
 	fmt.Printf("%p\n", &h1)
-	h1 = &transportStru{IP: "1.1.1.1", TargetPort: 6003}
+	h1 = &transportImpl{IP: "1.1.1.1", TargetPort: 6003}
 	fmt.Printf("%p\n", &h1)
 
 	// hl = hl.add(h)

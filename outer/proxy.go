@@ -1,12 +1,14 @@
 package outer
 
 import (
-	"github.com/qyqx233/go-tunel/lib"
 	"net"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/qyqx233/go-tunel/lib"
+	"github.com/rs/zerolog/log"
 )
 
 type proxySvrMngStru struct {
@@ -54,14 +56,14 @@ func (m *proxySvrMngStru) setPortavailable() int {
 	return -1
 }
 
-func (m *proxySvrMngStru) newServer(t *transportStru) error {
+func (m *proxySvrMngStru) newServer(t *transportImpl) error {
 	var port = t.LocalPort
 	if port == 0 {
 		port = m.findAvailablePort()
 		t.LocalPort = port
 	}
 	svr := proxySvrStru{localPort: port, t: t}
-	logger.Infof("在端口%d启动服务转发至%s:%s:%d", port, t.IP, t.TargetHost, t.TargetPort)
+	log.Error().Msgf("在端口%d启动服务转发至%s:%s:%d", port, t.IP, t.TargetHost, t.TargetPort)
 	err := svr.start()
 	if err != nil {
 		return err
@@ -74,7 +76,7 @@ func (m *proxySvrMngStru) newServer(t *transportStru) error {
 
 type proxySvrStru struct {
 	localPort int
-	t         *transportStru
+	t         *transportImpl
 }
 
 func (c proxySvrStru) handleConnConn(conn net.Conn) {
@@ -85,7 +87,7 @@ func (c proxySvrStru) handleConnConn(conn net.Conn) {
 	select {
 	case wt = <-c.t.connCh:
 	default:
-		logger.Info("需要获取临时通道")
+		log.Info().Msg("需要获取临时通道")
 		t = time.NewTimer(time.Duration(int64(time.Second) * config.Global.WaitNewConnSeconds))
 		ch = make(chan lib.WrapConnStru)
 		c.t.newCh <- reqConnChanStru{wc.ID(), &ch}
@@ -94,7 +96,7 @@ func (c proxySvrStru) handleConnConn(conn net.Conn) {
 		case wt = <-ch:
 			t.Stop()
 		case <-t.C:
-			logger.Error("获取临时通道超时")
+			log.Error().Msg("获取临时通道超时")
 			conn.Close()
 			return
 		}

@@ -10,7 +10,7 @@ func Test1(t *testing.T) {
 	addr, _ := net.ResolveTCPAddr("tcp", ":3333")
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		logger.Error(err)
+		t.Error(err)
 	}
 	t.Log(reflect.TypeOf(conn))
 	// conn.Re

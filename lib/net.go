@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/qyqx233/go-tunel/lib/proto"
+	"github.com/rs/zerolog/log"
 )
 
 type LogConn interface {
@@ -38,7 +39,7 @@ func (w WrapConnStru) ID() int64 {
 
 func (w *WrapConnStru) ShutDown() error {
 	if atomic.CompareAndSwapInt32(&w.atomic, 0, 1) {
-		logger.Infof("通道%d被关闭", w.ID())
+		log.Info().Msgf("通道%d被关闭", w.ID())
 		return w.Conn.Close()
 	}
 	return nil
@@ -57,9 +58,9 @@ func Pipe(wg *sync.WaitGroup, to net.Conn, from net.Conn) {
 	var err error
 	n, err := io.Copy(to, from)
 	if err != nil {
-		logger.Errorf("io.Copy err = %v", err)
+		log.Error().Msgf("io.Copy err = %v", err)
 	} else {
-		logger.Infof("io.Copy %d bytes", n)
+		log.Error().Msgf("io.Copy %d bytes", n)
 	}
 	from.Close()
 	to.Close()
@@ -105,6 +106,7 @@ func copyBuffer(dst net.Conn, src net.Conn, buf []byte, h func(net.Conn, []byte)
 	for {
 		nr, er := src.Read(buf)
 		if nr > 0 {
+			log.Info().Msgf("shsh %v", h)
 			h(src, buf[:nr])
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
@@ -134,10 +136,10 @@ func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) 
 	n, err = io.Copy(to.Conn, from.Conn)
 	for {
 		if err != nil {
-			logger.Errorf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)
+			log.Info().Msgf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)
 			break
 		} else {
-			logger.Infof("%d->%d io.Copy %d bytes", from.ID(), to.ID(), n)
+			log.Info().Msgf("%d->%d io.Copy %d bytes", from.ID(), to.ID(), n)
 			break
 		}
 	}
@@ -146,20 +148,20 @@ func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) 
 }
 
 func Pipe3(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func(), h func(net.Conn, []byte)) {
+	defer wg.Done()
 	var err error
 	var n int64
 	n, err = Copy(to.Conn, from.Conn, h)
 	for {
 		if err != nil {
-			logger.Errorf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)
+			log.Info().Msgf("%d->%d io.Copy failed: %v", from.ID(), to.ID(), err)
 			break
 		} else {
-			logger.Infof("%d->%d io.Copy %d bytes", from.ID(), to.ID(), n)
+			log.Info().Msgf("%d->%d io.Copy %d bytes", from.ID(), to.ID(), n)
 			break
 		}
 	}
 	done()
-	wg.Done()
 }
 
 func SetTcpOptions(conn net.Conn, options ...int) {

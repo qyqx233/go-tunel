@@ -9,6 +9,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/lib/proto"
+	"github.com/rs/zerolog/log"
 )
 
 var maxUint63 uint64 = 2<<62 - 1
@@ -45,17 +46,17 @@ func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID i
 	}
 	err := shake.Send(conn)
 	if err != nil {
-		logger.Error(err)
+		log.Error().Err(err).Msg("error")
 		return err
 	}
 	if transportType == proto.CmdType {
 		err = shake.Recv(conn)
 		if err != nil {
-			logger.Error(err)
+			log.Error().Err(err).Msg("error")
 			return err
 		}
 		if shake.Code != proto.OkCode {
-			logger.Errorf("握手返回错误码%d", shake.Code)
+			log.Info().Msgf("握手返回错误码%d", shake.Code)
 			return FatalError{code: shake.Code, msg: "握手错误"}
 		}
 	}
@@ -70,7 +71,7 @@ func (t *transport) createCmdAndConn() error {
 	addr, _ := net.ResolveTCPAddr("tcp", t.serverIp+":"+strconv.Itoa(t.serverPort))
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		logger.Error(err)
+		log.Error().Err(err).Msg("error")
 		t.atomic = 0
 		return err
 	}
@@ -115,7 +116,7 @@ func (t *transport) monitor(wg *sync.WaitGroup) {
 	tk := time.NewTicker(time.Duration(time.Minute))
 	for {
 		<-tk.C
-		logger.Debug("定时探测...")
+		log.Debug().Msg("定时探测...")
 		err := t.createCmdAndConn()
 		if _, ok := err.(FatalError); ok {
 			tk.Stop()
@@ -134,11 +135,11 @@ func (t *transport) handleCmd(conn net.Conn) {
 		cmd := proto.CmdProto{}
 		err := cmd.Recv(conn)
 		if err != nil {
-			logger.Error(err)
+			log.Error().Err(err).Msg("error")
 			break
 		}
 		go func(c proto.CmdProto) {
-			logger.Infof("获取到一个请求，用途=%d, reqID=%d", cmd.Usage, cmd.ReqID)
+			log.Info().Msgf("获取到一个请求，用途=%d, reqID=%d", cmd.Usage, cmd.ReqID)
 			switch cmd.Usage {
 			case proto.TransportReqUsage:
 				var conn net.Conn
@@ -147,12 +148,12 @@ func (t *transport) handleCmd(conn net.Conn) {
 				addr, _ := net.ResolveTCPAddr("tcp", t.serverIp+":"+strconv.Itoa(t.serverPort))
 				for i := 0; i < 3; i++ {
 					if i == 2 {
-						logger.Error("创建回应链接连续两次失败，不再尝试")
+						log.Info().Msgf("创建回应链接连续两次失败，不再尝试")
 						return
 					}
 					conn, err = net.DialTCP("tcp", nil, addr)
 					if err != nil {
-						logger.Errorf("创建回应临时链接失败%v", err)
+						log.Info().Msgf("创建回应临时链接失败%v", err)
 						continue
 					}
 					id = lib.NextPosUid()
@@ -200,7 +201,7 @@ func (c wrappedConn) run(t *transport, reConn bool) {
 	addr, _ := net.ResolveTCPAddr("tcp", t.targetHost+":"+strconv.Itoa(t.targetPort))
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
-		logger.Errorf("建立与%s:%d的链接失败", t.targetHost, t.targetPort)
+		log.Info().Msgf("建立与%s:%d的链接失败", t.targetHost, t.targetPort)
 		c.Close()
 		return
 	}

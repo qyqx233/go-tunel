@@ -2,17 +2,16 @@ package outer
 
 import (
 	"flag"
-	"github.com/qyqx233/go-tunel/lib"
-)
 
-var logger = lib.GetLogger()
+	"github.com/rs/zerolog/log"
+)
 
 func Start() {
 	var path string
 	flag.StringVar(&path, "c", "outer.toml", "config path")
 	parseConfig(path)
 	for _, ch := range config.Transport {
-		h := transportStru{
+		h := transportImpl{
 			IP:         ch.IP,
 			TargetHost: ch.TargetHost,
 			TargetPort: ch.TargetPort,
@@ -21,10 +20,10 @@ func Start() {
 			MaxConnNum: ch.MaxConnNum,
 			LocalPort:  ch.LocalPort,
 		}
-		logger.Infof("添加远程服务%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
+		log.Info().Msgf("添加远程服务%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
 		transportMng.add(&h)
 	}
-	logger.Infof("初始化了%d个transport", len(transportMng.tl))
+	log.Info().Msgf("初始化了%d个transport", len(transportMng.tl))
 	proxySvrMng = newproxySvrMng(config.ProxyServer.MinPort,
 		config.ProxyServer.MaxPort)
 	go httpSvr(config.HttpServer.bindAddr())

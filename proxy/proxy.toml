@@ -1,6 +1,8 @@
-[[Transport]
+[[Transport]]
 
 Addr = ":10024"
-TargetHost = "127.0.0.1"
-TargetPort = 7070
+# TargetHost = "192.168.50.55"
+# TargetPort = 80
+TargetHost = "192.168.50.76"
+TargetPort = 554
 UsePool = false

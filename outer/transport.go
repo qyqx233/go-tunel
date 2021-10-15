@@ -6,6 +6,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/lib/proto"
+	"github.com/rs/zerolog/log"
 )
 
 type hostConf struct {
@@ -20,7 +21,7 @@ type reqConnChanStru struct {
 	ch    *chan lib.WrapConnStru
 }
 
-type transportStru struct {
+type transportImpl struct {
 	ID         uint64
 	IP         string
 	TargetHost string
@@ -46,7 +47,7 @@ type transportStru struct {
 }
 
 // 总是最多被一个coroutine调用
-func (t *transportStru) shutdown() {
+func (t *transportImpl) shutdown() {
 	t.State = proto.ShutdownState
 	for {
 		select {
@@ -60,7 +61,7 @@ func (t *transportStru) shutdown() {
 }
 
 // 总是最多被一个coroutine调用
-func (t *transportStru) restart(ctx context.Context, conn lib.WrapConnStru) {
+func (t *transportImpl) restart(ctx context.Context, conn lib.WrapConnStru) {
 	if t.State == proto.RegState {
 		t.connCh = make(chan lib.WrapConnStru, t.MinConnNum)
 		t.newCh = make(chan reqConnChanStru, 10)
@@ -70,7 +71,7 @@ func (t *transportStru) restart(ctx context.Context, conn lib.WrapConnStru) {
 	t.State = proto.ShakeState
 }
 
-func (t *transportStru) monitor(ctx context.Context) {
+func (t *transportImpl) monitor(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -79,15 +80,15 @@ func (t *transportStru) monitor(ctx context.Context) {
 			go func() {
 				defer func() {
 					if err := recover(); err != nil {
-						logger.Errorf("%v", err)
+						log.Error().Msgf("%v", err)
 					}
 				}()
 				rid := ch.reqID
-				logger.Infof("请求与服务器%s:%d的临时通道, reqID=%d", t.IP, t.TargetPort, rid)
+				log.Info().Msgf("请求与服务器%s:%d的临时通道, reqID=%d", t.IP, t.TargetPort, rid)
 				cmd := proto.CmdProto{Usage: proto.TransportReqUsage, ReqID: rid}
 				err := cmd.Send(t.cmdConn.Conn)
 				if err != nil {
-					logger.Error(err)
+					log.Error().Err(err).Msg("error")
 					return
 				}
 				t.asyncMap.Store(rid, ch)
@@ -96,11 +97,11 @@ func (t *transportStru) monitor(ctx context.Context) {
 	}
 }
 
-type transportList []*transportStru
+type transportList []*transportImpl
 
 var initCap = 64
 
-func (l transportList) search(h *transportStru) (bool, int) {
+func (l transportList) search(h *transportImpl) (bool, int) {
 	d := 0
 	begin := 0
 	end := len(l) - 1
@@ -125,7 +126,7 @@ func (l transportList) search(h *transportStru) (bool, int) {
 	return false, mid + d
 }
 
-func (m *TransportMng) add(h *transportStru) transportList {
+func (m *TransportMng) add(h *transportImpl) transportList {
 	l := m.tl
 	leng := len(l)
 	if leng == 0 {
@@ -135,7 +136,7 @@ func (m *TransportMng) add(h *transportStru) transportList {
 	}
 	has, pos := l.search(h)
 	if !has {
-		l = append(l, &transportStru{})
+		l = append(l, &transportImpl{})
 		for i := leng; i > pos; i-- {
 			l[i] = l[i-1]
 		}
@@ -145,16 +146,16 @@ func (m *TransportMng) add(h *transportStru) transportList {
 	return l
 }
 
-func (m *TransportMng) remove(h *transportStru) transportList {
+func (m *TransportMng) remove(h *transportImpl) transportList {
 	l := m.tl
 	leng := len(l)
 	if leng == 1 {
-		l = make([]*transportStru, 0, initCap)
+		l = make([]*transportImpl, 0, initCap)
 		m.tl = l
 		return l
 	}
 	_, pos := l.search(h)
-	ll := make([]*transportStru, leng-1, initCap)
+	ll := make([]*transportImpl, leng-1, initCap)
 	if pos > 0 {
 		copy(ll[:pos], l[:pos])
 	}
@@ -174,6 +175,6 @@ type TransportMng struct {
 var transportMng TransportMng
 
 func init() {
-	transportMng.tl = make([]*transportStru, 0, initCap)
+	transportMng.tl = make([]*transportImpl, 0, initCap)
 	transportMng.rwl = &sync.RWMutex{}
 }

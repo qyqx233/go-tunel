@@ -4,3 +4,6 @@ proxy/escape.txt
 proxy/main.exe
 inner/err.log
 .vscode/settings.json
+proxy/dump.bin
+proxy/proxy.exe
+go.sum

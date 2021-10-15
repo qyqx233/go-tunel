@@ -48,7 +48,7 @@ func (h H) handleRegister(w http.ResponseWriter, host, port, name, symkey string
 	// var nameArr, symkeyArr [16]byte
 	nameBytes := []byte(name)
 	symkeyBytes := []byte(symkey)
-	tl = transportMng.add(&transportStru{IP: host, TargetPort: portInt, Name: nameBytes, SymKey: symkeyBytes})
+	tl = transportMng.add(&transportImpl{IP: host, TargetPort: portInt, Name: nameBytes, SymKey: symkeyBytes})
 	transportMng.rwl.Unlock()
 	fmt.Println(transportMng.tl)
 }

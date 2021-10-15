@@ -2,10 +2,10 @@ package inner
 
 import (
 	"flag"
-	"github.com/BurntSushi/toml"
-	"go.uber.org/zap"
-	"github.com/qyqx233/go-tunel/lib"
 	"sync"
+
+	"github.com/BurntSushi/toml"
+	"github.com/qyqx233/go-tunel/lib"
 )
 
 type FatalError struct {
@@ -38,18 +38,11 @@ type Config struct {
 	Transport []*ConfigTransport
 }
 
-var logger *zap.SugaredLogger
-
-func init() {
-	logger = lib.GetLogger()
-}
-
 func Start() {
 	var path string
 	var config Config
 	flag.StringVar(&path, "c", "inner.toml", "config path")
 	flag.Parse()
-	logger.Debug(path)
 	_, err := toml.DecodeFile(path, &config)
 	if err != nil {
 		panic(err)
