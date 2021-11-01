@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	// "github.com/qyqx233/go-tunel/proxy/cmd"
 	"github.com/qyqx233/go-tunel/server"
 	"github.com/qyqx233/gtool/lib/convert"
 	"github.com/rs/zerolog/log"
@@ -79,17 +80,62 @@ func newDumpServer(file string, port int) (err error) {
 	return
 }
 
+func printMsg(file string) {
+	fd, err := os.Open(file)
+	if err != nil {
+		panic(err)
+	}
+	length := make([]byte, 8)
+	for {
+		var n int
+		n, err = fd.Read(length)
+		if err != nil || n == 0 {
+			if err == io.EOF {
+				break
+			}
+			log.Error().Err(err).Msg("error")
+			break
+		}
+		data := make([]byte, n)
+		fd.Read(data)
+		println(convert.Bytes2String(data))
+	}
+
+}
+
+func parseFlag(cmd, configPath, file *string, port *int, isDump *bool) {
+	proxyCmd := flag.NewFlagSet("proxy", flag.ExitOnError)
+	proxyCmd.StringVar(configPath, "c", "proxy.yaml", "config file")
+	proxyCmd.IntVar(port, "p", 9088, "port")
+	proxyCmd.StringVar(file, "f", "dump.bin", "config")
+	proxyCmd.BoolVar(isDump, "d", false, "is dump")
+	dumpCmd := flag.NewFlagSet("dump", flag.ExitOnError)
+	dumpCmd.StringVar(file, "f", "dump.bin", "config")
+	// flag.Parse()
+	switch os.Args[1] {
+	case "proxy":
+		proxyCmd.Parse(os.Args[2:])
+		*cmd = "proxy"
+	case "dump":
+		dumpCmd.Parse(os.Args[2:])
+		*cmd = "dump"
+	default:
+		panic("no such cmd: " + "`" + os.Args[1] + "`")
+	}
+}
+
 func main() {
-	var configPath, file string
+	var configPath, file, cmd string
 	var isDump bool
 	var port int
 	var w io.WriteCloser
-	flag.StringVar(&configPath, "c", "proxy.toml", "config")
-	flag.IntVar(&port, "p", 9088, "port")
-	flag.StringVar(&file, "f", "dump.bin", "config")
-	flag.BoolVar(&isDump, "d", false, "is dump")
-	flag.Parse()
+	parseFlag(&cmd, &configPath, &file, &port, &isDump)
 	parseConfig(configPath)
+	// cmd.Execute()
+	if cmd == "dump" {
+		printMsg(file)
+		return
+	}
 
 	if isDump {
 		log.Info().Str("file", file).Msg("dump to file")
