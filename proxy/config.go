@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	"github.com/rs/zerolog/log"
@@ -28,16 +27,16 @@ func parseConfig(configPath string) {
 	if err != nil {
 		panic(err)
 	}
-	config.Transport = append(config.Transport, &ConfigTransport{})
-	config.Transport = append(config.Transport, &ConfigTransport{})
-	data, err = yaml.Marshal(&config)
-	log.Debug().Str("data", string(data)).Msg("data")
-	fmt.Println(string(data))
+	// config.Transport = append(config.Transport, &ConfigTransport{})
+	// config.Transport = append(config.Transport, &ConfigTransport{})
+	// data, err = yaml.Marshal(&config)
+	// log.Debug().Str("data", string(data)).Msg("data")
+	// fmt.Println(string(data))
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		panic(err)
 	}
-	log.Debug().Interface("ss", &config).Msg("config")
+	log.Debug().Interface("config", &config).Msg("print config")
 	// _, err := toml.DecodeFile(configPath, &config)
 	// if err != nil {
 	// 	panic(err)
