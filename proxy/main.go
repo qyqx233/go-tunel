@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/qyqx233/go-tunel/server"
 	"github.com/qyqx233/gtool/lib/convert"
@@ -18,7 +19,7 @@ type writer struct {
 }
 
 func newWriter(name string) *writer {
-	fd, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0600)
+	fd, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -96,15 +97,42 @@ func main() {
 	}
 	defer w.Close()
 	for _, transport := range config.Transport {
-		svr := server.NewTransportServer(transport.Addr, transport.TargetHost, transport.TargetPort)
-		svr.Handle = func(c net.Conn, buf []byte) {
-			log.Info().Str("local", c.LocalAddr().String()).Str("remote", c.RemoteAddr().String()).Msg("forward")
-			w.Write(buf)
+		addr := transport.Addr
+		var host string
+		var ports string
+		var beginPort, endPort int
+		tmpArr := strings.Split(addr, ":")
+		host, ports = tmpArr[0], tmpArr[1]
+		if strings.Contains(ports, "-") {
+			tmpArr = strings.Split(ports, "-")
+			beginPort, _ = strconv.Atoi(tmpArr[0])
+			endPort, _ = strconv.Atoi(tmpArr[1])
+		} else {
+			beginPort, _ = strconv.Atoi(ports)
+			endPort = beginPort
 		}
-		log.Info().Msgf("在端口%s启动转发到%s:%d的服务", transport.Addr, transport.TargetHost, transport.TargetPort)
-		err := svr.Start()
-		if err != nil {
-			panic(err)
+		total := endPort - beginPort + 1
+		ch := make(chan struct{}, 1000)
+		go func() {
+			for i := 0; i < total; i++ {
+				ch <- struct{}{}
+			}
+			close(ch)
+		}()
+		for port := beginPort; port <= endPort; port++ {
+			go func(port int) {
+				<-ch
+				svr := server.NewTransportServer(host+":"+strconv.Itoa(port), transport.TargetHost, transport.TargetPort)
+				svr.Handle = func(c net.Conn, buf []byte) {
+					log.Info().Str("local", c.LocalAddr().String()).Str("remote", c.RemoteAddr().String()).Msg("forward")
+					w.Write(buf)
+				}
+				log.Info().Msgf("start server at %d, transport to %s:%d", port, transport.TargetHost, transport.TargetPort)
+				err := svr.Start()
+				if err != nil {
+					log.Error().Err(err)
+				}
+			}(port)
 		}
 	}
 	newDumpServer(file, port)
