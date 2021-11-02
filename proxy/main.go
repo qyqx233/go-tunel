@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -96,9 +97,9 @@ func printMsg(file string) {
 			log.Error().Err(err).Msg("error")
 			break
 		}
-		data := make([]byte, n)
+		data := make([]byte, convert.Bytes2Uint64(length))
 		fd.Read(data)
-		println(convert.Bytes2String(data))
+		fmt.Println(convert.Bytes2String(data))
 	}
 
 }
