@@ -97,7 +97,7 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 			shake.Code = proto.KeyErrorCode
 		}
 	} else {
-		log.Info().Msg("查询不到服务器")
+		log.Error().Msg("查询不到服务器")
 		shake.Code = proto.HostNotRegisterCode
 	}
 	return

@@ -3,6 +3,8 @@ package proto
 import (
 	"net"
 	"unsafe"
+
+	"github.com/rs/zerolog/log"
 )
 
 type zz struct {
@@ -11,7 +13,29 @@ type zz struct {
 
 var Magic uint16 = 65424
 
+type FileProto struct {
+	Version int8
+	Size    int8
+	Name    [256]byte
+	zz
+}
+
+type RawDataProto struct {
+	Size int
+	zz
+}
+
+type CmdProto struct {
+	zz
+	Type      int8
+	Usage     int8
+	Code      int8
+	ReqID     int64
+	CorrReqID int64
+}
+
 type ShakeProto struct {
+	zz
 	TcpOrUdp byte
 	Type     int8 // 1-命令通道,2-传输通道
 	Usage    int8
@@ -24,7 +48,6 @@ type ShakeProto struct {
 	Host      [32]byte
 	ReqID     int64
 	CorrReqId int64
-	zz
 }
 
 const (
@@ -63,15 +86,6 @@ const (
 	False int = iota
 	True
 )
-
-type CmdProto struct {
-	zz
-	Type      int8
-	Usage     int8
-	Code      int8
-	ReqID     int64
-	CorrReqID int64
-}
 
 func (cmd zz) send(conn net.Conn, p unsafe.Pointer, n int) error {
 	slice := Slice{Addr: p, Cap: n, Len: n}
@@ -116,6 +130,7 @@ func (c *CmdProto) Recv(conn net.Conn) error {
 }
 
 func (c *ShakeProto) Send(conn net.Conn) error {
+	log.Debug().Uint16("magic", c.Magic).Msg("print magic num")
 	return c.zz.send(conn, unsafe.Pointer(c), int(unsafe.Sizeof(*c)))
 }
 
