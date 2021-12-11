@@ -102,6 +102,7 @@ type transportList []*transportImpl
 var initCap = 64
 
 func (l transportList) search(h *transportImpl) (bool, int) {
+	log.Debug()
 	d := 0
 	begin := 0
 	end := len(l) - 1

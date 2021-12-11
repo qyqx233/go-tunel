@@ -78,7 +78,7 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 	targetHost := string(lib.Byte32ToBytes(shake.Host))
 	log.Info().Msgf("服务器 地址%s:%s:%d", host, string(targetHost), shake.Port)
 	if shake.Magic != proto.Magic {
-		log.Info().Msg("proto magic error")
+		log.Info().Uint16("magic", shake.Magic).Msg("proto magic error")
 		shake.Code = proto.MagicErrorCode
 		return
 	}
