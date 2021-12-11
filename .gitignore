@@ -1,8 +1,7 @@
-inner/inner.exe
-outer/proxy.exe
-proxy/escape.txt
-proxy/main.exe
-inner/err.log
+*.exe
+**/*.exe
+*.txt
+*.log
 .vscode/settings.json
 proxy/dump.bin
 proxy/proxy.exe

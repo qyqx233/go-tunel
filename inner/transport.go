@@ -40,7 +40,7 @@ func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID i
 		Name:      t.name,
 		SymKey:    t.symkey,
 		Host:      lib.String2Byte32(t.targetHost),
-		Port:      t.targetPort,
+		Port:      uint16(t.targetPort),
 		ReqID:     reqID,
 		CorrReqId: corrReqID,
 	}

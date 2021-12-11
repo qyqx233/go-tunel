@@ -79,7 +79,7 @@ type proxySvrStru struct {
 	t         *transportImpl
 }
 
-func (c proxySvrStru) handleConnConn(conn net.Conn) {
+func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	var wt lib.WrapConnStru
 	var ch chan lib.WrapConnStru
 	var t *time.Timer

@@ -9,19 +9,19 @@ type zz struct {
 	Version byte
 }
 
-var Magic int64 = 1122334455667788
+var Magic uint16 = 65424
 
 type ShakeProto struct {
 	TcpOrUdp byte
 	Type     int8 // 1-命令通道,2-传输通道
 	Usage    int8
 	Code     int8
-	Magic    int64
+	Magic    uint16
+	Port     uint16
 	Name     [16]byte
 	SymKey   [16]byte
 	// Error     [64]byte
 	Host      [32]byte
-	Port      int
 	ReqID     int64
 	CorrReqId int64
 	zz

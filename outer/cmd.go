@@ -11,6 +11,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/lib/proto"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -79,9 +80,10 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 	if shake.Magic != proto.Magic {
 		log.Info().Msg("proto magic error")
 		shake.Code = proto.MagicErrorCode
+		return
 	}
 	v := transportImpl{IP: host,
-		TargetPort: shake.Port,
+		TargetPort: int(shake.Port),
 		TargetHost: targetHost,
 		SymKey:     lib.Byte16ToBytes(shake.SymKey),
 		Name:       lib.Byte16ToBytes(shake.Name),
