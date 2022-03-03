@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"time"
+	"unsafe"
 
 	// "github.com/qyqx233/go-tunel/proxy/cmd"
 	"github.com/qyqx233/go-tunel/server"
@@ -16,27 +20,45 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type writer struct {
-	w io.WriteCloser
+type DumpWriter struct {
+	w *bufio.Writer
+	f *os.File
 }
 
-func newWriter(name string) *writer {
+func NewDumpWriter(name string) *DumpWriter {
 	fd, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		panic(err)
 	}
-	return &writer{
-		w: fd,
+	return &DumpWriter{
+		w: bufio.NewWriter(fd),
 	}
 }
 
-func (w *writer) Write(buf []byte) (int, error) {
-	w.w.Write(convert.Int2Bytes(len(buf)))
+type MsgHeader struct {
+	Len       int
+	Timestamp int64
+}
+
+const headerLen = int(unsafe.Sizeof(MsgHeader{}) - unsafe.Sizeof(int(0)))
+
+// func stru2Bytes(p uintptr, len int) []byte {
+// 	sl := reflect.SliceHeader{}
+// 	return
+// }
+
+func (w *DumpWriter) Write(buf []byte) (int, error) {
+	var header = MsgHeader{}
+	header.Len = len(buf) + headerLen
+	header.Timestamp = time.Now().Unix()
+	w.w.Write(convert.Int2Bytes(len(buf) + int(unsafe.Sizeof(int(0)))))
+	w.w.Write(convert.Int642Bytes(header.Timestamp))
 	return w.w.Write(buf)
 }
 
-func (w *writer) Close() error {
-	return w.w.(*os.File).Close()
+func (w *DumpWriter) Close() error {
+	w.w.Flush()
+	return w.f.Close()
 }
 
 type DumpServer struct {
@@ -99,7 +121,9 @@ func printMsg(file string) {
 		}
 		data := make([]byte, convert.Bytes2Uint64(length))
 		fd.Read(data)
-		fmt.Println(convert.Bytes2String(data))
+		var timestamp = int64(convert.Bytes2Uint64(data[:8]))
+		fmt.Println("Time at " + time.Unix(timestamp, 0).Format("2006-01-02 15:04:05"))
+		fmt.Print(convert.Bytes2String(data[8:]))
 	}
 
 }
@@ -140,7 +164,7 @@ func main() {
 
 	if isDump {
 		log.Info().Str("file", file).Msg("dump to file")
-		w = newWriter(file)
+		w = NewDumpWriter(file)
 	}
 	defer w.Close()
 	for _, transport := range config.Transport {
@@ -182,5 +206,14 @@ func main() {
 			}(port)
 		}
 	}
-	newDumpServer(file, port)
+	go newDumpServer(file, port)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		fmt.Println("catch ctrl+c, exit")
+		w.Close()
+		os.Exit(0)
+	}()
+	select {}
 }

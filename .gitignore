@@ -7,3 +7,4 @@ inner/err.log
 proxy/dump.bin
 proxy/proxy.exe
 go.sum
+outer/cmd/cmd.exe

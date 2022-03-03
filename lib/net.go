@@ -72,8 +72,6 @@ type rwError struct {
 	d string
 }
 
-var ioCopy = io.Copy
-
 func Copy(dst net.Conn, src net.Conn, h func(net.Conn, []byte)) (written int64, err error) {
 	return copyBuffer(dst, src, nil, h)
 }
@@ -106,7 +104,6 @@ func copyBuffer(dst net.Conn, src net.Conn, buf []byte, h func(net.Conn, []byte)
 	for {
 		nr, er := src.Read(buf)
 		if nr > 0 {
-			log.Info().Msgf("shsh %v", h)
 			h(src, buf[:nr])
 			nw, ew := dst.Write(buf[0:nr])
 			if nw > 0 {
@@ -130,6 +127,7 @@ func copyBuffer(dst net.Conn, src net.Conn, buf []byte, h func(net.Conn, []byte)
 	}
 	return written, err
 }
+
 func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) {
 	var err error
 	var n int64

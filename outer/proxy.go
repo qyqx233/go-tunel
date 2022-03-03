@@ -79,7 +79,7 @@ type proxySvrStru struct {
 	t         *transportImpl
 }
 
-func (c proxySvrStru) handleConnConn(conn net.Conn) {
+func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	var wt lib.WrapConnStru
 	var ch chan lib.WrapConnStru
 	var t *time.Timer
@@ -103,14 +103,7 @@ func (c proxySvrStru) handleConnConn(conn net.Conn) {
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
-	go lib.Pipe2(wg, wc, wt, func() {
-		wc.ShutDown()
-		wt.ShutDown()
-	})
-	go lib.Pipe2(wg, wt, wc, func() {
-		wt.ShutDown()
-		wc.ShutDown()
-	})
+	pipeSocket(wg, wc, wt)
 	wg.Wait()
 }
 
