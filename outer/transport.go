@@ -34,7 +34,6 @@ type transportImpl struct {
 	MaxConnNum int
 	AllowIps   []string
 	asyncMap   sync.Map
-	mu         sync.Mutex
 	atomic     int32
 	//
 	proxyStarted bool
@@ -43,6 +42,7 @@ type transportImpl struct {
 	cmdConn      lib.WrapConnStru
 	connCh       chan lib.WrapConnStru // 缓存的传输通道
 	newCh        chan reqConnChanStru  // 用来监听是否需要创建临时通道
+	Dump         bool
 	// cmdCh   chan struct{}
 }
 
@@ -165,12 +165,12 @@ func (m *TransportMng) remove(h *transportImpl) transportList {
 	return l
 }
 
-var tl transportList
-
 type TransportMng struct {
 	rwl *sync.RWMutex
 	tl  transportList
 }
+
+var tl transportList
 
 var transportMng TransportMng
 

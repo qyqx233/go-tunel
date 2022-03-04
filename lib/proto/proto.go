@@ -13,9 +13,9 @@ var Magic int64 = 1122334455667788
 
 type ShakeProto struct {
 	TcpOrUdp byte
-	Type     int8 // 1-命令通道,2-传输通道
+	Type     TransportTypeEnum // 1-命令通道,2-传输通道
 	Usage    int8
-	Code     int8
+	Code     ShakeCodeEnum
 	Magic    int64
 	Name     [16]byte
 	SymKey   [16]byte
@@ -40,13 +40,17 @@ const (
 	InitiativeTransportUsage
 )
 
+type TransportTypeEnum int8
+
 const (
-	CmdType int8 = iota
+	CmdType TransportTypeEnum = iota
 	TransportType
 )
 
+type ShakeCodeEnum int8
+
 const (
-	OkCode int8 = iota
+	OkCode ShakeCodeEnum = iota
 	HostNotRegisterCode
 	KeyErrorCode
 	TooManyConns
@@ -68,7 +72,7 @@ type CmdProto struct {
 	zz
 	Type      int8
 	Usage     int8
-	Code      int8
+	Code      ShakeCodeEnum
 	ReqID     int64
 	CorrReqID int64
 }

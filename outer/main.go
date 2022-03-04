@@ -19,6 +19,7 @@ func Start() {
 			MinConnNum: ch.MinConnNum,
 			MaxConnNum: ch.MaxConnNum,
 			LocalPort:  ch.LocalPort,
+			Dump:       ch.Dump,
 		}
 		log.Info().Msgf("添加远程服务%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
 		transportMng.add(&h)

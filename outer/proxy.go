@@ -14,7 +14,6 @@ import (
 type proxySvrMngStru struct {
 	m                sync.RWMutex
 	minPort, maxPort int
-	pushPos, popPos  int
 	ports            []int32
 	proxySvrs        map[int]proxySvrStru
 }
@@ -103,11 +102,15 @@ func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	}
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
-	pipeSocket(wg, wc, wt)
+	if c.t.Dump {
+		pipeSocketWithLog(wg, wc, wt)
+	} else {
+		pipeSocket(wg, wc, wt)
+	}
 	wg.Wait()
 }
 
-func (c proxySvrStru) start() error {
+func (c *proxySvrStru) start() error {
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(c.localPort))
 	if err != nil {
 		return err

@@ -27,6 +27,7 @@ type ConfigTransport struct {
 	MaxConnNum int
 	LocalPort  int
 	KeepAlive  bool
+	Dump       bool
 }
 
 type ConfigProxy struct {

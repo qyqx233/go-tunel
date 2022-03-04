@@ -1,10 +1,9 @@
-inner/inner.exe
-outer/proxy.exe
+*.exe
 proxy/escape.txt
-proxy/main.exe
-inner/err.log
 .vscode/settings.json
 proxy/dump.bin
-proxy/proxy.exe
 go.sum
 outer/cmd/cmd.exe
+*.log
+dump.1
+dump.txt
