@@ -26,13 +26,11 @@ type transport struct {
 	name       [16]byte
 	symkey     [16]byte
 	idleConns  int32
-	connCh     chan net.Conn
-	conns      []net.Conn
 	atomic     int32
 	shakeRetry int
 }
 
-func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID int64, corrReqID int64) error {
+func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, usage int8, reqID int64, corrReqID int64) error {
 	shake := proto.ShakeProto{
 		Magic:     proto.Magic,
 		Type:      transportType,
@@ -57,7 +55,7 @@ func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID i
 		}
 		if shake.Code != proto.OkCode {
 			log.Info().Msgf("握手返回错误码%d", shake.Code)
-			return FatalError{code: shake.Code, msg: "握手错误"}
+			return FatalError{code: int8(shake.Code), msg: "握手错误"}
 		}
 	}
 	return nil
