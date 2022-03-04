@@ -21,6 +21,7 @@ var reqID uint64
 type cmdServer struct {
 }
 
+// 握手成功后会创建服务器
 func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *transportImpl) {
 	log.Info().Msg("开始回应命令通道")
 	lib.SetTcpOptions(wc.Conn, proto.KeepAliveTcpOption, proto.True, proto.NoDelayOption, proto.True)
@@ -87,13 +88,13 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 	has, pos := transportMng.tl.search(&v)
 	if has {
 		t = transportMng.tl[pos]
-		if bytes.Equal(v.SymKey, t.SymKey) {
-		} else {
+		if !bytes.Equal(v.SymKey, t.SymKey) {
 			log.Info().Msg("key不匹配")
 			shake.Code = proto.KeyErrorCode
 		}
 	} else {
-		log.Error().Msg("查询不到服务器")
+		log.Error().Str("host", v.TargetHost).Int("port", v.TargetPort).Msg("查询不到服务器")
+		log.Error().Interface("", transportMng.tl).Msg("通道列表")
 		shake.Code = proto.HostNotRegisterCode
 	}
 	return
