@@ -11,6 +11,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/lib/proto"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -77,11 +78,12 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 	targetHost := string(lib.Byte32ToBytes(shake.Host))
 	log.Info().Msgf("服务器 地址%s:%s:%d", host, string(targetHost), shake.Port)
 	if shake.Magic != proto.Magic {
-		log.Info().Msg("proto magic error")
+		log.Info().Uint16("magic", shake.Magic).Msg("proto magic error")
 		shake.Code = proto.MagicErrorCode
+		return
 	}
 	v := transportImpl{IP: host,
-		TargetPort: shake.Port,
+		TargetPort: int(shake.Port),
 		TargetHost: targetHost,
 		SymKey:     lib.Byte16ToBytes(shake.SymKey),
 		Name:       lib.Byte16ToBytes(shake.Name),
@@ -95,7 +97,7 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 			shake.Code = proto.KeyErrorCode
 		}
 	} else {
-		log.Info().Msg("查询不到服务器")
+		log.Error().Msg("查询不到服务器")
 		shake.Code = proto.HostNotRegisterCode
 	}
 	return

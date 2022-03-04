@@ -3,28 +3,51 @@ package proto
 import (
 	"net"
 	"unsafe"
+
+	"github.com/rs/zerolog/log"
 )
 
 type zz struct {
 	Version byte
 }
 
-var Magic int64 = 1122334455667788
+var Magic uint16 = 65424
+
+type FileProto struct {
+	Version int8
+	Size    int8
+	Name    [256]byte
+	zz
+}
+
+type RawDataProto struct {
+	Size int
+	zz
+}
+
+type CmdProto struct {
+	zz
+	Type      int8
+	Usage     int8
+	Code      int8
+	ReqID     int64
+	CorrReqID int64
+}
 
 type ShakeProto struct {
+	zz
 	TcpOrUdp byte
-	Type     TransportTypeEnum // 1-命令通道,2-传输通道
+	Type     int8 // 1-命令通道,2-传输通道
 	Usage    int8
-	Code     ShakeCodeEnum
-	Magic    int64
+	Code     int8
+	Magic    uint16
+	Port     uint16
 	Name     [16]byte
 	SymKey   [16]byte
 	// Error     [64]byte
 	Host      [32]byte
-	Port      int
 	ReqID     int64
 	CorrReqId int64
-	zz
 }
 
 const (
@@ -40,17 +63,13 @@ const (
 	InitiativeTransportUsage
 )
 
-type TransportTypeEnum int8
-
 const (
-	CmdType TransportTypeEnum = iota
+	CmdType int8 = iota
 	TransportType
 )
 
-type ShakeCodeEnum int8
-
 const (
-	OkCode ShakeCodeEnum = iota
+	OkCode int8 = iota
 	HostNotRegisterCode
 	KeyErrorCode
 	TooManyConns
@@ -67,15 +86,6 @@ const (
 	False int = iota
 	True
 )
-
-type CmdProto struct {
-	zz
-	Type      int8
-	Usage     int8
-	Code      ShakeCodeEnum
-	ReqID     int64
-	CorrReqID int64
-}
 
 func (cmd zz) send(conn net.Conn, p unsafe.Pointer, n int) error {
 	slice := Slice{Addr: p, Cap: n, Len: n}
@@ -120,6 +130,7 @@ func (c *CmdProto) Recv(conn net.Conn) error {
 }
 
 func (c *ShakeProto) Send(conn net.Conn) error {
+	log.Debug().Uint16("magic", c.Magic).Msg("print magic num")
 	return c.zz.send(conn, unsafe.Pointer(c), int(unsafe.Sizeof(*c)))
 }
 

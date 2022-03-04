@@ -40,7 +40,7 @@ func (t *transport) shake(conn net.Conn, transportType int8, usage int8, reqID i
 		Name:      t.name,
 		SymKey:    t.symkey,
 		Host:      lib.String2Byte32(t.targetHost),
-		Port:      t.targetPort,
+		Port:      uint16(t.targetPort),
 		ReqID:     reqID,
 		CorrReqId: corrReqID,
 	}
@@ -191,20 +191,22 @@ func (w *wrappedConn) Shutdown() error {
 	return w.Shutdown()
 }
 
-func newWrappedConn(conn net.Conn, id int64, duration bool) wrappedConn {
-	return wrappedConn{WrapConnStru: lib.NewWrapConn(conn, id)}
+func newWrappedConn(conn net.Conn, id int64, duration bool) *wrappedConn {
+	return &wrappedConn{WrapConnStru: lib.NewWrapConn(conn, id)}
 	// return wrappedConn{conn, duration, Ui, 0}
 }
 
-func (c wrappedConn) run(t *transport, reConn bool) {
+func (c *wrappedConn) run(t *transport, reConn bool) {
 	// c := wrappedConn{}
-	addr, _ := net.ResolveTCPAddr("tcp", t.targetHost+":"+strconv.Itoa(t.targetPort))
+	var target = t.targetHost + ":" + strconv.Itoa(t.targetPort)
+	addr, _ := net.ResolveTCPAddr("tcp", target)
 	conn, err := net.DialTCP("tcp", nil, addr)
 	if err != nil {
 		log.Info().Msgf("建立与%s:%d的链接失败", t.targetHost, t.targetPort)
 		c.Close()
 		return
 	}
+	log.Debug().Str("target", target).Msg("connection made")
 	wg := &sync.WaitGroup{}
 	wc := lib.NewWrapConn(conn, lib.NextPosUid())
 	wg.Add(2)

@@ -9,6 +9,7 @@ import (
 func Start() {
 	var path string
 	flag.StringVar(&path, "c", "outer.toml", "config path")
+	log.Info().Msgf("读取配置%s", path)
 	parseConfig(path)
 	for _, ch := range config.Transport {
 		h := transportImpl{

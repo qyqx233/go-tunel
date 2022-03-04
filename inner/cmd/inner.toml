@@ -4,10 +4,10 @@ Symkey = "0123456789012345"
 
 
 [[Transport]]                   # 可以映射多个服务
-TargetPort = 8888               # 要映射到外网服务的端口
+TargetPort = 8889               # 要映射到外网服务的端口
 TargetHost = "127.0.0.1"        # 要映射到外网服务的地址
-ServerIp = "127.0.0.1"          # 云服务器地址
-ServerPort = 3333               # 云服务命令端口
+ServerIp = "118.25.195.227"          # 云服务器地址
+ServerPort = 20081               # 云服务命令端口
 
 [[Transport]]
 TargetPort = 4403

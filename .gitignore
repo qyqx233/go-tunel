@@ -1,5 +1,7 @@
 *.exe
-proxy/escape.txt
+**/*.exe
+*.txt
+*.log
 .vscode/settings.json
 proxy/dump.bin
 go.sum
