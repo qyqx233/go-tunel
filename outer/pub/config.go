@@ -5,3 +5,7 @@ type MemStorStru struct {
 }
 
 var MemStor MemStorStru
+
+func init() {
+	MemStor.Ips = make(map[string]struct{})
+}
