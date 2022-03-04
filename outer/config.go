@@ -28,6 +28,7 @@ type ConfigTransport struct {
 	LocalPort  int
 	KeepAlive  bool
 	Dump       bool
+	AddIp      bool
 }
 
 type ConfigProxy struct {

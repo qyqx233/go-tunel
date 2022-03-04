@@ -10,6 +10,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/lib/proto"
+	"github.com/qyqx233/go-tunel/outer/pub"
 
 	"github.com/rs/zerolog/log"
 )
@@ -19,6 +20,11 @@ var reqID uint64
 // 负责接收内网机器发过来的命令通道与传输通道
 // 命令通道建立成功之后会分配一个端口用来转发请求至内网机器。如果命令通道断开，并不会关闭该端口
 type cmdServer struct {
+}
+
+func getIp(s string) string {
+	idx := strings.LastIndex(s, ":")
+	return s[:idx]
 }
 
 // 握手成功后会创建服务器
@@ -41,6 +47,9 @@ func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *tra
 			return
 		}
 		t.proxyStarted = true
+	}
+	if t.AddIp {
+		pub.MemStor.Ips[getIp(wc.LocalAddr().String())] = struct{}{}
 	}
 	t.restart(ctx, wc) // 把conn传递给transportStru
 	defer t.shutdown()

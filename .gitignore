@@ -9,3 +9,4 @@ outer/cmd/cmd.exe
 *.log
 dump.1
 dump.txt
+*.bin

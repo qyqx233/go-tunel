@@ -40,6 +40,7 @@ type transportImpl struct {
 	connCh       chan lib.WrapConnStru // 缓存的传输通道
 	newCh        chan reqConnChanStru  // 用来监听是否需要创建临时通道
 	Dump         bool
+	AddIp        bool
 	// cmdCh   chan struct{}
 }
 
