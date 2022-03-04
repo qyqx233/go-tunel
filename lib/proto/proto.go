@@ -28,8 +28,8 @@ type RawDataProto struct {
 type CmdProto struct {
 	zz
 	Type      int8
-	Usage     int8
-	Code      ShakeCodeEnum
+	Usage     ShakeProtoUsageEnum
+	Code      ShakeErrEnum
 	ReqID     int64
 	CorrReqID int64
 }
@@ -38,8 +38,8 @@ type ShakeProto struct {
 	zz
 	TcpOrUdp byte
 	Type     TransportTypeEnum // 1-命令通道,2-传输通道
-	Usage    int8
-	Code     ShakeCodeEnum
+	Usage    ShakeProtoUsageEnum
+	Code     ShakeErrEnum
 	Magic    uint16
 	Port     uint16
 	Name     [16]byte
@@ -50,14 +50,18 @@ type ShakeProto struct {
 	CorrReqId int64
 }
 
-const (
-	RegState      int = iota // 初始化状态
-	ShakeState               //握手成功的状态
-	ShutdownState            // 命令通道关闭的状态
-)
+type ShakeStateEnum int
 
 const (
-	TransportReqUsage int8 = iota
+	RegState      ShakeStateEnum = iota // 初始化状态
+	ShakeState                          //握手成功的状态
+	ShutdownState                       // 命令通道关闭的状态
+)
+
+type ShakeProtoUsageEnum int8
+
+const (
+	TransportReqUsage ShakeProtoUsageEnum = iota
 	TransportRspUsage
 	BeatUsage
 	InitiativeTransportUsage
@@ -70,10 +74,10 @@ const (
 	TransportType
 )
 
-type ShakeCodeEnum int8
+type ShakeErrEnum int8
 
 const (
-	OkCode ShakeCodeEnum = iota
+	OkCode ShakeErrEnum = iota
 	HostNotRegisterCode
 	KeyErrorCode
 	TooManyConns

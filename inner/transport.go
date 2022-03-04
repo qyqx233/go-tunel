@@ -30,7 +30,7 @@ type transport struct {
 	shakeRetry int
 }
 
-func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, usage int8, reqID int64, corrReqID int64) error {
+func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, usage proto.ShakeProtoUsageEnum, reqID int64, corrReqID int64) error {
 	shake := proto.ShakeProto{
 		Magic:     proto.Magic,
 		Type:      transportType,

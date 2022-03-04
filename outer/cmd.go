@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net"
 	"strings"
-	"sync"
 	"sync/atomic"
 
 	"github.com/qyqx233/go-tunel/lib"
@@ -20,9 +19,6 @@ var reqID uint64
 // 负责接收内网机器发过来的命令通道与传输通道
 // 命令通道建立成功之后会分配一个端口用来转发请求至内网机器。如果命令通道断开，并不会关闭该端口
 type cmdServer struct {
-	conn       net.Conn
-	mu         sync.Mutex
-	transports map[string]int
 }
 
 func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *transportImpl) {

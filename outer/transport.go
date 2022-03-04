@@ -9,9 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type hostConf struct {
-}
-
 const (
 	RegState int = iota
 )
@@ -38,7 +35,7 @@ type transportImpl struct {
 	//
 	proxyStarted bool
 	connNum      int32
-	State        int
+	State        proto.ShakeStateEnum
 	cmdConn      lib.WrapConnStru
 	connCh       chan lib.WrapConnStru // 缓存的传输通道
 	newCh        chan reqConnChanStru  // 用来监听是否需要创建临时通道
@@ -102,7 +99,6 @@ type transportList []*transportImpl
 var initCap = 64
 
 func (l transportList) search(h *transportImpl) (bool, int) {
-	log.Debug()
 	d := 0
 	begin := 0
 	end := len(l) - 1
@@ -113,9 +109,9 @@ func (l transportList) search(h *transportImpl) (bool, int) {
 		v := l[mid]
 		// logger.Infof("%d %s:%s:%d", mid, v.IP, v.TargetHost, v.TargetPort)
 		// logger.Infof("%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
-		if v.IP == h.IP && v.TargetHost == h.TargetHost && v.TargetPort == h.TargetPort {
+		if v.TargetHost == h.TargetHost && v.TargetPort == h.TargetPort {
 			return true, mid
-		} else if v.IP < h.IP || v.TargetHost < h.TargetHost ||
+		} else if v.TargetHost < h.TargetHost ||
 			v.TargetPort < h.TargetPort {
 			begin = mid + 1
 			d = 1
