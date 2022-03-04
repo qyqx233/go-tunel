@@ -73,7 +73,7 @@ func (c *cmdServer) shake(conn net.Conn, shake *proto.ShakeProto) (string, error
 
 func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t *transportImpl) {
 	targetHost := string(lib.Byte32ToBytes(shake.Host))
-	log.Info().Msgf("服务器 地址%s:%s:%d", host, string(targetHost), shake.Port)
+	log.Info().Msgf("服务器 地址%s:%s:%d", host, targetHost, shake.Port)
 	if shake.Magic != proto.Magic {
 		log.Info().Uint16("magic", shake.Magic).Msg("proto magic error")
 		shake.Code = proto.MagicErrorCode
@@ -94,7 +94,7 @@ func (c *cmdServer) auth(conn net.Conn, host string, shake *proto.ShakeProto) (t
 		}
 	} else {
 		log.Error().Str("host", v.TargetHost).Int("port", v.TargetPort).Msg("查询不到服务器")
-		log.Error().Interface("", transportMng.tl).Msg("通道列表")
+		log.Error().Interface("transport List", transportMng.tl).Msg("通道列表")
 		shake.Code = proto.HostNotRegisterCode
 	}
 	return
