@@ -3,6 +3,7 @@ package outer
 import (
 	"flag"
 
+	"github.com/qyqx233/go-tunel/outer/pub"
 	"github.com/qyqx233/go-tunel/outer/rest"
 	"github.com/rs/zerolog/log"
 )
@@ -11,8 +12,8 @@ func Start() {
 	var path string
 	flag.StringVar(&path, "c", "outer.toml", "config path")
 	log.Info().Msgf("读取配置%s", path)
-	parseConfig(path)
-	go rest.StartRest(config.HttpServer.bindAddr())
+	config = pub.ParseConfig(path)
+	go rest.StartRest(config.HttpServer.BindAddr())
 	for _, ch := range config.Transport {
 		h := transportImpl{
 			IP:         ch.IP,
@@ -24,6 +25,7 @@ func Start() {
 			LocalPort:  ch.LocalPort,
 			Dump:       ch.Dump,
 			AddIp:      ch.AddIp,
+			Export:     ch.Export,
 		}
 		log.Info().Msgf("添加远程服务%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
 		transportMng.add(&h)
@@ -31,7 +33,7 @@ func Start() {
 	log.Info().Msgf("初始化了%d个transport", len(transportMng.tl))
 	proxySvrMng = newproxySvrMng(config.ProxyServer.MinPort,
 		config.ProxyServer.MaxPort)
-	_, err := newCmdServer(config.CmdServer.bindAddr())
+	_, err := newCmdServer(config.CmdServer.BindAddr())
 	if err != nil {
 		panic(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/qyqx233/go-tunel/lib"
+	"github.com/qyqx233/go-tunel/outer/pub"
 	"github.com/rs/zerolog/log"
 )
 
@@ -82,6 +83,14 @@ func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	var wt lib.WrapConnStru
 	var ch chan lib.WrapConnStru
 	var t *time.Timer
+	// 如果enable=False 表示当前转发通道并暂时关闭，此时直接关闭socket
+	if transport, ok := pub.MemStor.Transports[c.t.LocalPort]; ok {
+		if !transport.Enable {
+			conn.Close()
+			return
+		}
+	}
+
 	var wc = lib.NewWrapConn(conn, lib.NextUid())
 	select {
 	case wt = <-c.t.connCh:

@@ -19,28 +19,28 @@ type reqConnChanStru struct {
 }
 
 type transportImpl struct {
-	ID         uint64
-	IP         string
-	TargetHost string
-	TargetPort int
-	LocalPort  int
-	TcpOrUdp   string
-	Name       []byte
-	SymKey     []byte
-	MinConnNum int
-	MaxConnNum int
-	AllowIps   []string
-	asyncMap   sync.Map
-	atomic     int32
-	//
 	proxyStarted bool
+	Dump         bool
+	Export       bool
+	AddIp        bool
+	atomic       int32
 	connNum      int32
+	ID           uint64
+	IP           string
+	TargetHost   string
+	TargetPort   int
+	LocalPort    int
+	TcpOrUdp     string
+	Name         []byte
+	SymKey       []byte
+	MinConnNum   int
+	MaxConnNum   int
+	AllowIps     []string
 	State        proto.ShakeStateEnum
 	cmdConn      lib.WrapConnStru
 	connCh       chan lib.WrapConnStru // 缓存的传输通道
 	newCh        chan reqConnChanStru  // 用来监听是否需要创建临时通道
-	Dump         bool
-	AddIp        bool
+	asyncMap     sync.Map
 	// cmdCh   chan struct{}
 }
 

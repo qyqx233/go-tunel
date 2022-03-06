@@ -129,6 +129,7 @@ func copyBuffer(dst net.Conn, src net.Conn, buf []byte, h func(net.Conn, []byte)
 }
 
 func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) {
+	defer wg.Done()
 	var err error
 	var n int64
 	n, err = io.Copy(to.Conn, from.Conn)
@@ -142,7 +143,6 @@ func Pipe2(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func()) 
 		}
 	}
 	done()
-	wg.Done()
 }
 
 func Pipe3(wg *sync.WaitGroup, to WrapConnStru, from WrapConnStru, done func(), h func(net.Conn, []byte)) {

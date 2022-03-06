@@ -5,8 +5,12 @@
 .vscode/settings.json
 proxy/dump.bin
 go.sum
-outer/cmd/cmd.exe
-*.log
 dump.1
 dump.txt
 *.bin
+rserver/server/out/client
+rserver/server/abc
+rserver/server/out/main.go
+filedb/bdb/db_test.go
+filedb/bdb/demo
+db
