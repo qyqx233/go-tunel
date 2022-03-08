@@ -5,6 +5,7 @@ import (
 	"unsafe"
 
 	"github.com/cockroachdb/pebble"
+	"github.com/qyqx233/gtool/lib/convert"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,6 +37,13 @@ func PebbleGetBytes(key []byte) ([]byte, error) {
 type TransportPdb struct {
 	Enable bool
 	Export bool
+}
+
+func (t *TransportPdb) GetKey(port int) []byte {
+	var key = make([]byte, 0, 12)
+	key = append(key, "port:"...)
+	key = append(key, convert.Uint642Bytes(uint64(port))[0])
+	return key
 }
 
 type Response struct {
