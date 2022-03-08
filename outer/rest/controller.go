@@ -147,8 +147,9 @@ func StartRest(addr string) {
 	})
 	app.Post("/api/transport", func(c *fiber.Ctx) error {
 		type Msg struct {
-			Port   int  `json:"port"`
-			Enable bool `json:"enable"`
+			Port   int    `json:"port"`
+			Enable bool   `json:"enable"`
+			Usage  string `json:"usage"`
 		}
 		var msg = new(Msg)
 		c.BodyParser(msg)
@@ -168,6 +169,9 @@ func StartRest(addr string) {
 			log.Debug().Interface("MemStor.Transports", t).Interface("xx", pub.MemStor.Transports).Msg("print")
 		}
 		ts.Enable = msg.Enable
+		if len(msg.Usage) > 0 {
+			tsp.Usage = msg.Usage
+		}
 		pdb.Set(key, tsp.encode(), pebble.Sync)
 		return c.JSON(&Response{200, "success"})
 	})
@@ -192,6 +196,7 @@ func StartRest(addr string) {
 				TargetPort: t.TargetPort,
 				Port:       t.LocalPort,
 				Enable:     enable,
+				Usage:      ts.Usage,
 			})
 		}
 		return c.JSON(response)

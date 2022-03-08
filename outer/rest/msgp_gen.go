@@ -36,10 +36,10 @@ func (z *TransportPdb) DecodeMsg(dc *msgp.Reader) (err error) {
 				err = msgp.WrapError(err, "Export")
 				return
 			}
-		case "Name":
-			z.Name, err = dc.ReadString()
+		case "Usage":
+			z.Usage, err = dc.ReadString()
 			if err != nil {
-				err = msgp.WrapError(err, "Name")
+				err = msgp.WrapError(err, "Usage")
 				return
 			}
 		default:
@@ -76,14 +76,14 @@ func (z TransportPdb) EncodeMsg(en *msgp.Writer) (err error) {
 		err = msgp.WrapError(err, "Export")
 		return
 	}
-	// write "Name"
-	err = en.Append(0xa4, 0x4e, 0x61, 0x6d, 0x65)
+	// write "Usage"
+	err = en.Append(0xa5, 0x55, 0x73, 0x61, 0x67, 0x65)
 	if err != nil {
 		return
 	}
-	err = en.WriteString(z.Name)
+	err = en.WriteString(z.Usage)
 	if err != nil {
-		err = msgp.WrapError(err, "Name")
+		err = msgp.WrapError(err, "Usage")
 		return
 	}
 	return
@@ -99,9 +99,9 @@ func (z TransportPdb) MarshalMsg(b []byte) (o []byte, err error) {
 	// string "Export"
 	o = append(o, 0xa6, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74)
 	o = msgp.AppendBool(o, z.Export)
-	// string "Name"
-	o = append(o, 0xa4, 0x4e, 0x61, 0x6d, 0x65)
-	o = msgp.AppendString(o, z.Name)
+	// string "Usage"
+	o = append(o, 0xa5, 0x55, 0x73, 0x61, 0x67, 0x65)
+	o = msgp.AppendString(o, z.Usage)
 	return
 }
 
@@ -135,10 +135,10 @@ func (z *TransportPdb) UnmarshalMsg(bts []byte) (o []byte, err error) {
 				err = msgp.WrapError(err, "Export")
 				return
 			}
-		case "Name":
-			z.Name, bts, err = msgp.ReadStringBytes(bts)
+		case "Usage":
+			z.Usage, bts, err = msgp.ReadStringBytes(bts)
 			if err != nil {
-				err = msgp.WrapError(err, "Name")
+				err = msgp.WrapError(err, "Usage")
 				return
 			}
 		default:
@@ -155,6 +155,6 @@ func (z *TransportPdb) UnmarshalMsg(bts []byte) (o []byte, err error) {
 
 // Msgsize returns an upper bound estimate of the number of bytes occupied by the serialized message
 func (z TransportPdb) Msgsize() (s int) {
-	s = 1 + 7 + msgp.BoolSize + 7 + msgp.BoolSize + 5 + msgp.StringPrefixSize + len(z.Name)
+	s = 1 + 7 + msgp.BoolSize + 7 + msgp.BoolSize + 6 + msgp.StringPrefixSize + len(z.Usage)
 	return
 }

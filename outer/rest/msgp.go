@@ -5,5 +5,5 @@ package rest
 type TransportPdb struct {
 	Enable bool
 	Export bool
-	Name   string
+	Usage  string
 }

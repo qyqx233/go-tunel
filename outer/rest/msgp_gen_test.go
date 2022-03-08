@@ -42,11 +42,9 @@ func BenchmarkMarshalMsgTransportPdb(b *testing.B) {
 }
 
 func BenchmarkAppendMsgTransportPdb(b *testing.B) {
-	v := TransportPdb{
-		Name: "fuck",
-	}
+	v := TransportPdb{}
 	bts := make([]byte, 0, v.Msgsize())
-	bts, _ = v.MarshalMsg(bts)
+	bts, _ = v.MarshalMsg(bts[0:0])
 	b.SetBytes(int64(len(bts)))
 	b.ReportAllocs()
 	b.ResetTimer()
