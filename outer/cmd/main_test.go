@@ -61,3 +61,15 @@ func Test_type(t *testing.T) {
 	}
 	// sum([]int{1})
 }
+
+type adder interface {
+	add()
+}
+
+type minuser interface {
+	minus()
+}
+
+func Haha[T adder](t T) {
+
+}

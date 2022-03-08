@@ -34,11 +34,6 @@ func PebbleGetBytes(key []byte) ([]byte, error) {
 	return value, nil
 }
 
-type TransportPdb struct {
-	Enable bool
-	Export bool
-}
-
 func (t *TransportPdb) GetKey(port int) []byte {
 	var key = make([]byte, 0, 12)
 	key = append(key, "port:"...)
@@ -66,16 +61,21 @@ func (t *TransportPdb) Key() string {
 }
 
 func (t *TransportPdb) decode(data []byte) {
-	l := len(data)
-	h := reflect.SliceHeader{uintptr(unsafe.Pointer(t)), l, l}
-	bs := *(*[]byte)(unsafe.Pointer(&h))
-	copy(bs, data)
+	data, _ = t.UnmarshalMsg(data)
+	return
+	// l := len(data)
+	// h := reflect.SliceHeader{uintptr(unsafe.Pointer(t)), l, l}
+	// bs := *(*[]byte)(unsafe.Pointer(&h))
+	// copy(bs, data)
 }
 
 func (t *TransportPdb) encode() []byte {
-	l := int(unsafe.Sizeof(TransportPdb{}))
-	data := reflect.SliceHeader{uintptr(unsafe.Pointer(t)), l, l}
-	return *(*[]byte)(unsafe.Pointer(&data))
+	var data = make([]byte, 0, t.Msgsize())
+	data, _ = t.MarshalMsg(data)
+	return data
+	// l := int(unsafe.Sizeof(TransportPdb{}))
+	// data := reflect.SliceHeader{uintptr(unsafe.Pointer(t)), l, l}
+	// return *(*[]byte)(unsafe.Pointer(&data))
 }
 
 func InitDB() {

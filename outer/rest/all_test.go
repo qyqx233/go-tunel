@@ -6,7 +6,7 @@ import (
 )
 
 func TestDecoder(t *testing.T) {
-	var ts = TransportPdb{true, false}
+	var ts = TransportPdb{true, false, "fuck"}
 	t.Log(ts.encode())
 	var ts1 TransportPdb
 	ts1.decode(ts.encode())
