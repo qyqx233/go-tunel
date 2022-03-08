@@ -12,7 +12,13 @@ type Transport struct {
 
 type MemStorStru struct {
 	Ips        map[string]struct{} `json:"ips"`
-	Transports map[int]Transport   `json:"transports"`
+	Transports map[int]*Transport  `json:"transports"`
+}
+
+func (m *MemStorStru) Init(c *Config) {
+	for _, t := range c.Transport {
+		m.Transports[t.LocalPort] = &Transport{}
+	}
 }
 
 var MemStor MemStorStru
@@ -101,5 +107,5 @@ func ParseConfig(configPath string) *Config {
 
 func init() {
 	MemStor.Ips = make(map[string]struct{})
-	MemStor.Transports = make(map[int]Transport)
+	MemStor.Transports = make(map[int]*Transport)
 }

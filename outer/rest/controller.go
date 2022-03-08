@@ -163,9 +163,13 @@ func StartRest(addr string) {
 		key = append(key, "port:"...)
 		key = append(key, convert.Uint642Bytes(uint64(msg.Port))[0])
 		ts := pub.GetConfig().GetTs(msg.Port)
+		if t, ok := pub.MemStor.Transports[msg.Port]; ok {
+			t.Enable = msg.Enable
+			log.Debug().Interface("MemStor.Transports", t).Interface("xx", pub.MemStor.Transports).Msg("print")
+		}
 		ts.Enable = msg.Enable
 		pdb.Set(key, tsp.encode(), pebble.Sync)
-		return c.JSON(&Response{0, "success"})
+		return c.JSON(&Response{200, "success"})
 	})
 	app.Get("/api/transport", func(c *fiber.Ctx) error {
 		var response = new(ListTransport)
@@ -176,7 +180,7 @@ func StartRest(addr string) {
 				continue
 			}
 			var key = make([]byte, 0, 32)
-			var enable bool
+			var enable = true
 			key = append(key, "port:"...)
 			key = append(key, convert.Uint642Bytes(uint64(t.LocalPort))[0])
 			err := PebbleGet(key, &ts)

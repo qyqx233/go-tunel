@@ -29,6 +29,17 @@ func Start() {
 		}
 		log.Info().Msgf("添加远程服务%s:%s:%d", h.IP, h.TargetHost, h.TargetPort)
 		transportMng.add(&h)
+		var tpdb rest.TransportPdb
+		err := rest.PebbleGet(tpdb.GetKey(ch.LocalPort), &tpdb)
+		if err != nil {
+			pub.MemStor.Transports[ch.LocalPort] = &pub.Transport{
+				Enable: tpdb.Enable,
+			}
+		} else {
+			pub.MemStor.Transports[ch.LocalPort] = &pub.Transport{
+				Enable: true,
+			}
+		}
 	}
 	log.Info().Msgf("初始化了%d个transport", len(transportMng.tl))
 	proxySvrMng = newproxySvrMng(config.ProxyServer.MinPort,

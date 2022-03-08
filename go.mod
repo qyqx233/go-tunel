@@ -8,7 +8,6 @@ require (
 	github.com/gofiber/fiber/v2 v2.28.0
 	github.com/qyqx233/gtool v0.0.9-0.20210920234214-2cc89f20d4fc
 	github.com/rs/zerolog v1.26.0
-	github.com/smallnest/ringbuffer v0.0.0-20190731163335-1b6f30832f14
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 

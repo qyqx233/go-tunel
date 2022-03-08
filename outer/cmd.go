@@ -24,7 +24,10 @@ type cmdServer struct {
 
 func getIp(s string) string {
 	idx := strings.LastIndex(s, ":")
-	return s[:idx]
+	if idx >= 0 {
+		return s[:idx]
+	}
+	return s
 }
 
 // 握手成功后会创建服务器
@@ -49,7 +52,7 @@ func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *tra
 		t.proxyStarted = true
 	}
 	if t.AddIp {
-		pub.MemStor.Ips[getIp(wc.LocalAddr().String())] = struct{}{}
+		pub.MemStor.Ips[getIp(wc.RemoteAddr().String())] = struct{}{}
 	}
 	t.restart(ctx, wc) // 把conn传递给transportStru
 	defer t.shutdown()
