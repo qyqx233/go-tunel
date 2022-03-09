@@ -28,6 +28,7 @@ type transport struct {
 	idleConns  int32
 	atomic     int32
 	shakeRetry int
+	cmdConn    net.Conn
 }
 
 func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, usage proto.ShakeProtoUsageEnum, reqID int64, corrReqID int64) error {
@@ -64,6 +65,7 @@ func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, 
 // 使用go xxx调用
 func (t *transport) createCmdAndConn() error {
 	if !atomic.CompareAndSwapInt32(&t.atomic, 0, 1) {
+		log.Error().Msg("获取锁失败")
 		return nil
 	}
 	addr, _ := net.ResolveTCPAddr("tcp", t.serverIp+":"+strconv.Itoa(t.serverPort))
@@ -79,6 +81,7 @@ func (t *transport) createCmdAndConn() error {
 		t.atomic = 0
 		return err
 	}
+	t.cmdConn = conn
 	go t.handleCmd(conn)
 	// TODO 连接池好像真的挺烦的，。。。
 	// for i := 0; i < t.minConns; i++ {
@@ -115,12 +118,26 @@ func (t *transport) monitor(wg *sync.WaitGroup) {
 	for {
 		<-tk.C
 		log.Debug().Msg("定时探测...")
-		err := t.createCmdAndConn()
-		if _, ok := err.(FatalError); ok {
-			tk.Stop()
-			wg.Done()
-			break
+		if t.cmdConn == nil {
+			err := t.createCmdAndConn()
+			if err != nil {
+				continue
+			}
+		} else {
+			cmd := proto.CmdProto{}
+			cmd.Usage = proto.BeatUsage
+			err := cmd.Send(t.cmdConn)
+			if err != nil {
+				log.Err(err).Msg("定时探测包发送失败")
+				t.cmdConn.Close()
+			}
+
 		}
+		// err := t.createCmdAndConn()
+		// if _, ok := err.(FatalError); ok {
+		// 	tk.Stop()
+		// 	break
+		// }
 	}
 }
 
@@ -139,6 +156,8 @@ func (t *transport) handleCmd(conn net.Conn) {
 		go func(c proto.CmdProto) {
 			log.Info().Msgf("获取到一个请求，用途=%d, reqID=%d", cmd.Usage, cmd.ReqID)
 			switch cmd.Usage {
+			case proto.BeatUsage:
+				log.Debug().Msg("收到♥跳响应包")
 			case proto.TransportReqUsage:
 				var conn net.Conn
 				var err error

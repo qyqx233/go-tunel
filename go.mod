@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.28.0
 	github.com/qyqx233/gtool v0.0.9-0.20210920234214-2cc89f20d4fc
 	github.com/rs/zerolog v1.26.0
+	github.com/tinylib/msgp v1.1.6
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -28,7 +29,6 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.33.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

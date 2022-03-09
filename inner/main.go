@@ -64,5 +64,5 @@ func Start() {
 		go t.createCmdAndConn()
 		go t.monitor(wg)
 	}
-	wg.Wait()
+	select {}
 }

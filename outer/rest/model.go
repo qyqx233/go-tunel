@@ -1,9 +1,6 @@
 package rest
 
 import (
-	"reflect"
-	"unsafe"
-
 	"github.com/cockroachdb/pebble"
 	"github.com/qyqx233/gtool/lib/convert"
 	"github.com/rs/zerolog/log"
@@ -44,16 +41,6 @@ func (t *TransportPdb) GetKey(port int) []byte {
 type Response struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
-}
-
-type basePdb struct {
-	size uint8
-}
-
-func (t *basePdb) encode() []byte {
-	l := int(unsafe.Sizeof(basePdb{}))
-	data := reflect.SliceHeader{uintptr(unsafe.Pointer(t)), l, l}
-	return *(*[]byte)(unsafe.Pointer(&data))
 }
 
 func (t *TransportPdb) Key() string {

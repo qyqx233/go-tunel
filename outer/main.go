@@ -14,6 +14,7 @@ func Start() {
 	log.Info().Msgf("读取配置%s", path)
 	config = pub.ParseConfig(path)
 	go rest.StartRest(config.HttpServer.BindAddr())
+	// 初始化结构体tranportMng，pub.MemStor（内存中节点元信息）
 	for _, ch := range config.Transport {
 		h := transportImpl{
 			IP:         ch.IP,
