@@ -49,5 +49,6 @@ func Start() {
 	if err != nil {
 		panic(err)
 	}
+	proxySvrMng.handle() // 监听server的管理
 	select {}
 }

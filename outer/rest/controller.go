@@ -173,6 +173,10 @@ func StartRest(addr string) {
 			tsp.Usage = msg.Usage
 		}
 		pdb.Set(key, tsp.encode(), pebble.Sync)
+		EnableSvrChan <- EnableSvrMsg{
+			Port:   uint16(msg.Port),
+			Enable: msg.Enable,
+		}
 		return c.JSON(&Response{200, "success"})
 	})
 	app.Get("/api/transport", func(c *fiber.Ctx) error {

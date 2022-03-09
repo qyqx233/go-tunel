@@ -19,7 +19,7 @@ type reqConnChanStru struct {
 }
 
 type transportImpl struct {
-	proxyStarted bool
+	proxyStarted bool // 是否监听转发端口
 	Dump         bool
 	Export       bool
 	AddIp        bool
@@ -36,7 +36,7 @@ type transportImpl struct {
 	MinConnNum   int
 	MaxConnNum   int
 	AllowIps     []string
-	State        proto.ShakeStateEnum
+	State        proto.ShakeStateEnum // 通道状态
 	cmdConn      lib.WrapConnStru
 	connCh       chan lib.WrapConnStru // 缓存的传输通道
 	newCh        chan reqConnChanStru  // 用来监听是否需要创建临时通道

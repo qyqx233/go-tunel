@@ -32,6 +32,7 @@ func getIp(s string) string {
 
 // 握手成功后会创建服务器
 func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *transportImpl) {
+	defer wc.Close()
 	log.Info().Msg("开始回应命令通道")
 	lib.SetTcpOptions(wc.Conn, proto.KeepAliveTcpOption, proto.True, proto.NoDelayOption, proto.True)
 	// 收到成功响应内网客户端才认为通道建立成功
@@ -55,7 +56,9 @@ func (c *cmdServer) cmdLoop(wc lib.WrapConnStru, shake *proto.ShakeProto, t *tra
 		pub.MemStor.Ips[getIp(wc.RemoteAddr().String())] = struct{}{}
 	}
 	t.restart(ctx, wc) // 把conn传递给transportStru
-	defer t.shutdown()
+	defer func() {
+		t.shutdown()
+	}()
 	for {
 		cmd := proto.CmdProto{} // 接收内网客户端发过来的心跳包
 		err = cmd.Recv(wc)

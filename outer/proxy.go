@@ -9,6 +9,7 @@ import (
 
 	"github.com/qyqx233/go-tunel/lib"
 	"github.com/qyqx233/go-tunel/outer/pub"
+	"github.com/qyqx233/go-tunel/outer/rest"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,7 +17,7 @@ type proxySvrMngStru struct {
 	m                sync.RWMutex
 	minPort, maxPort int
 	ports            []int32
-	proxySvrs        map[int]*proxySvrStru
+	proxySvrs        map[int]*proxySvrSt
 }
 
 var proxySvrMng *proxySvrMngStru
@@ -26,8 +27,34 @@ func newproxySvrMng(minPort, maxPort int) *proxySvrMngStru {
 		minPort:   minPort,
 		maxPort:   maxPort,
 		ports:     make([]int32, 0, maxPort-minPort+1),
-		proxySvrs: make(map[int]*proxySvrStru),
+		proxySvrs: make(map[int]*proxySvrSt),
 	}
+}
+
+// 读取ch更新server状态（是否关闭etc...）
+// 前提假设, `proxySvrs`被正常初始化
+func (m *proxySvrMngStru) handle() {
+	go func() {
+		for {
+			req := <-rest.EnableSvrChan
+			if svr, ok := m.proxySvrs[int(req.Port)]; ok {
+				if req.Enable {
+					if !svr.t.proxyStarted {
+						err := svr.start()
+						if err == nil {
+							svr.t.proxyStarted = true
+						}
+					}
+				} else {
+					if svr.t.proxyStarted {
+						svr.stop()
+						svr.t.proxyStarted = false
+					}
+				}
+			}
+		}
+	}()
+
 }
 
 func (m *proxySvrMngStru) findAvailablePort() int {
@@ -62,7 +89,7 @@ func (m *proxySvrMngStru) newServer(t *transportImpl) error {
 		port = m.findAvailablePort()
 		t.LocalPort = port
 	}
-	svr := &proxySvrStru{localPort: port, t: t}
+	svr := &proxySvrSt{localPort: port, t: t}
 	log.Error().Msgf("在端口%d启动服务转发至%s:%s:%d", port, t.IP, t.TargetHost, t.TargetPort)
 	err := svr.start()
 	if err != nil {
@@ -79,13 +106,13 @@ func (m *proxySvrMngStru) closeServer(t *transportImpl) (err error) {
 	return
 }
 
-type proxySvrStru struct {
+type proxySvrSt struct {
 	localPort int
 	t         *transportImpl
 	listener  net.Listener
 }
 
-func (c *proxySvrStru) handleConnConn(conn net.Conn) {
+func (c *proxySvrSt) handleConnConn(conn net.Conn) {
 	var wt lib.WrapConnStru
 	var ch chan lib.WrapConnStru
 	var t *time.Timer
@@ -126,7 +153,7 @@ func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	wg.Wait()
 }
 
-func (svr *proxySvrStru) start() error {
+func (svr *proxySvrSt) start() error {
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(svr.localPort))
 	if err != nil {
 		return err
@@ -144,8 +171,14 @@ func (svr *proxySvrStru) start() error {
 	return nil
 }
 
-func (svr *proxySvrStru) stop() (err error) {
-	svr.listener.Close()
-	log.Info().Int("port", svr.localPort).Msg("关闭转发服务")
+func (svr *proxySvrSt) stop() (err error) {
+	svr.t.shutdown()
+	err = svr.listener.Close()
+	if err != nil {
+		log.Error().Err(err).Int("port", svr.localPort).Msg("关闭转发端口失败")
+		return
+	}
+	svr.t.proxyStarted = false
+	log.Info().Int("port", svr.localPort).Msg("关闭转发端口成功")
 	return
 }
