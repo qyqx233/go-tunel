@@ -16,7 +16,7 @@ type proxySvrMngStru struct {
 	m                sync.RWMutex
 	minPort, maxPort int
 	ports            []int32
-	proxySvrs        map[int]proxySvrStru
+	proxySvrs        map[int]*proxySvrStru
 }
 
 var proxySvrMng *proxySvrMngStru
@@ -26,7 +26,7 @@ func newproxySvrMng(minPort, maxPort int) *proxySvrMngStru {
 		minPort:   minPort,
 		maxPort:   maxPort,
 		ports:     make([]int32, 0, maxPort-minPort+1),
-		proxySvrs: make(map[int]proxySvrStru),
+		proxySvrs: make(map[int]*proxySvrStru),
 	}
 }
 
@@ -62,7 +62,7 @@ func (m *proxySvrMngStru) newServer(t *transportImpl) error {
 		port = m.findAvailablePort()
 		t.LocalPort = port
 	}
-	svr := proxySvrStru{localPort: port, t: t}
+	svr := &proxySvrStru{localPort: port, t: t}
 	log.Error().Msgf("在端口%d启动服务转发至%s:%s:%d", port, t.IP, t.TargetHost, t.TargetPort)
 	err := svr.start()
 	if err != nil {
@@ -74,9 +74,15 @@ func (m *proxySvrMngStru) newServer(t *transportImpl) error {
 	return nil
 }
 
+func (m *proxySvrMngStru) closeServer(t *transportImpl) (err error) {
+	err = m.proxySvrs[t.LocalPort].stop()
+	return
+}
+
 type proxySvrStru struct {
 	localPort int
 	t         *transportImpl
+	listener  net.Listener
 }
 
 func (c *proxySvrStru) handleConnConn(conn net.Conn) {
@@ -120,8 +126,8 @@ func (c *proxySvrStru) handleConnConn(conn net.Conn) {
 	wg.Wait()
 }
 
-func (c *proxySvrStru) start() error {
-	listener, err := net.Listen("tcp", ":"+strconv.Itoa(c.localPort))
+func (svr *proxySvrStru) start() error {
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(svr.localPort))
 	if err != nil {
 		return err
 	}
@@ -131,8 +137,15 @@ func (c *proxySvrStru) start() error {
 			if err != nil {
 				continue
 			}
-			go c.handleConnConn(conn)
+			go svr.handleConnConn(conn)
 		}
 	}()
+	svr.listener = listener
 	return nil
+}
+
+func (svr *proxySvrStru) stop() (err error) {
+	svr.listener.Close()
+	log.Info().Int("port", svr.localPort).Msg("关闭转发服务")
+	return
 }
