@@ -62,7 +62,7 @@ func (t *transport) shake(conn net.Conn, transportType proto.TransportTypeEnum, 
 	return nil
 }
 
-// 使用go xxx调用
+// 连接后会启动协程
 func (t *transport) createCmdAndConn() error {
 	if !atomic.CompareAndSwapInt32(&t.atomic, 0, 1) {
 		log.Error().Msg("获取锁失败")
@@ -128,8 +128,9 @@ func (t *transport) monitor(wg *sync.WaitGroup) {
 			cmd.Usage = proto.BeatUsage
 			err := cmd.Send(t.cmdConn)
 			if err != nil {
-				log.Err(err).Msg("定时探测包发送失败")
+				log.Err(err).Msg("定时探测包发送失败，关闭cmdConn")
 				t.cmdConn.Close()
+				t.cmdConn = nil
 			}
 
 		}

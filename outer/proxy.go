@@ -13,17 +13,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type proxySvrMngStru struct {
+type proxySvrMngSt struct {
 	m                sync.RWMutex
 	minPort, maxPort int
 	ports            []int32
 	proxySvrs        map[int]*proxySvrSt
 }
 
-var proxySvrMng *proxySvrMngStru
+var proxySvrMng *proxySvrMngSt
 
-func newproxySvrMng(minPort, maxPort int) *proxySvrMngStru {
-	return &proxySvrMngStru{
+func newproxySvrMng(minPort, maxPort int) *proxySvrMngSt {
+	return &proxySvrMngSt{
 		minPort:   minPort,
 		maxPort:   maxPort,
 		ports:     make([]int32, 0, maxPort-minPort+1),
@@ -33,7 +33,7 @@ func newproxySvrMng(minPort, maxPort int) *proxySvrMngStru {
 
 // 读取ch更新server状态（是否关闭etc...）
 // 前提假设, `proxySvrs`被正常初始化
-func (m *proxySvrMngStru) handle() {
+func (m *proxySvrMngSt) handle() {
 	go func() {
 		for {
 			req := <-rest.EnableSvrChan
@@ -57,7 +57,7 @@ func (m *proxySvrMngStru) handle() {
 
 }
 
-func (m *proxySvrMngStru) findAvailablePort() int {
+func (m *proxySvrMngSt) findAvailablePort() int {
 	secs := ((m.maxPort + 1 - m.minPort) / 64)
 	sec := int(reqID) % secs
 	ports := m.ports[64*sec : 64*(sec+1)]
@@ -70,7 +70,7 @@ func (m *proxySvrMngStru) findAvailablePort() int {
 	return -1
 }
 
-func (m *proxySvrMngStru) setPortavailable() int {
+func (m *proxySvrMngSt) setPortavailable() int {
 	secs := ((m.maxPort + 1 - m.minPort) / 64)
 	sec := int(reqID) % secs
 	ports := m.ports[64*sec : 64*(sec+1)]
@@ -83,7 +83,7 @@ func (m *proxySvrMngStru) setPortavailable() int {
 	return -1
 }
 
-func (m *proxySvrMngStru) newServer(t *transportImpl) error {
+func (m *proxySvrMngSt) newServer(t *transportImpl) error {
 	var port = t.LocalPort
 	if port == 0 {
 		port = m.findAvailablePort()
@@ -101,7 +101,7 @@ func (m *proxySvrMngStru) newServer(t *transportImpl) error {
 	return nil
 }
 
-func (m *proxySvrMngStru) closeServer(t *transportImpl) (err error) {
+func (m *proxySvrMngSt) closeServer(t *transportImpl) (err error) {
 	err = m.proxySvrs[t.LocalPort].stop()
 	return
 }
