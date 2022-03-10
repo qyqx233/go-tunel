@@ -132,10 +132,12 @@ func (c *cmdServer) dispatch(conn net.Conn, shake *proto.ShakeProto, t *transpor
 				shake.ReqID, shake.CorrReqId)
 			lib.SetTcpOptions(conn, proto.KeepAliveTcpOption, proto.True,
 				proto.NoDelayOption, proto.True)
-			v, _ := t.asyncMap.Load(shake.CorrReqId)
-			ch1 := v.(reqConnChanStru).ch
-			*ch1 <- lib.NewWrapConn(conn, shake.ReqID)
-			t.asyncMap.Delete(shake.ReqID)
+			v, ok := t.asyncMap.Load(shake.CorrReqId)
+			if ok {
+				ch1 := v.(reqConnChanStru).ch
+				*ch1 <- lib.NewWrapConn(conn, shake.ReqID)
+				t.asyncMap.Delete(shake.CorrReqId)
+			}
 		}
 	} else {
 		if !atomic.CompareAndSwapInt32(&t.atomic, 0, 1) {
