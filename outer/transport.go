@@ -108,10 +108,9 @@ func (l transportList) search(h *transportImpl) (bool, int) {
 		mid = (begin + end) / 2
 		// println(begin, end, mid)
 		v := l[mid]
-		// logger.Infof("%d %s:%s:%d", mid, v.IP, v.TargetHost, v.TargetPort)
 		if v.TargetHost == h.TargetHost && v.TargetPort == h.TargetPort {
 			return true, mid
-		} else if v.TargetHost > h.TargetHost || v.TargetPort > h.TargetPort {
+		} else if h.TargetHost < v.TargetHost || (h.TargetHost == v.TargetHost && h.TargetPort < v.TargetPort) {
 			end = mid - 1
 			d = 0
 		} else {
